@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% load static%}
+{% block content %}<header class="bg-light text-center py-5">
+  <div class="container">
+    <h1 class="display-5">Welcome to Bensalem High's Hoagie Ordering System</h1>
+    <p class="lead">Order your favorite hoagie today and customize it just how you like!</p>
+    <a href="#hoagie-options" class="btn btn-primary btn-lg">Explore Our Hoagies</a>
+  </div>
+</header>
+
+<!-- Hoagie Options Section -->
+<section id="hoagie-options" class="py-5">
+  <div class="container">
+    <h2 class="text-center mb-5">Our Hoagie Options</h2>
+    <div class="row gy-4">
+
+<!-- Turkey Hoagie -->
+<div class="col-md-6 col-lg-3">
+<div class="card hoagie-card"> 
+  <div class="card-img-container">
+    <img src="{% static 'images/turkey.png' %}"   
+         class="card-img-top position-absolute" 
+         alt="Turkey Hoagie" 
+         style="top: 18px; left: 50px; width: 200px; height: auto;">
+  </div>
+  <div class="card-body text-center">
+    <h5 class="card-title">Turkey Hoagie</h5>
+    <p class="card-text">Classic Deli Turkey <br>Calories: 250</p>
+  </div>
+</div>
+</div>
+
+<!-- Tuna Hoagie -->
+<div class="col-md-6 col-lg-3">
+<div class="card hoagie-card"> 
+  <div class="card-img-container">
+    <img src="{% static 'images/tuna.png' %}"   
+         class="card-img-top position-absolute" 
+         alt="Tuna Hoagie" 
+         style="top: 6px; left: 50px; width: 200px; height: auto;">
+  </div>
+  <div class="card-body text-center">
+    <h5 class="card-title">Tuna Hoagie</h5>
+    <p class="card-text">Tuna Mayo Salad <br>Calories: 250</p>
+  </div>
+</div>
+</div>
+
+<!-- Chicken Hoagie -->
+<div class="col-md-6 col-lg-3">
+<div class="card hoagie-card"> 
+  <div class="card-img-container">
+    <img src="{% static 'images/chickensalad.png' %}"   
+         class="card-img-top position-absolute" 
+         alt="Chicken Hoagie" 
+         style="top: 20px; left: 50px; width: 100px; height: auto;">
+  </div>
+  <div class="card-body text-center">
+    <h5 class="card-title">Chicken Hoagie</h5>
+    <p class="card-text">Chicken Mayo Salad <br>Calories: 250</p>
+  </div>
+</div>
+</div>
+
+  <!-- Cheese Hoagie -->
+<div class="col-md-6 col-lg-3">
+<div class="card hoagie-card"> 
+  <div class="card-img-container">
+    <img src="{% static 'images/cheese.png' %}"   
+          class="card-img-top position-absolute" 
+          alt="Cheese Hoagie" 
+          style="top: 20px; left: 50px; width: 100px; height: auto;">
+  </div>
+  <div class="card-body text-center">
+    <h5 class="card-title">Cheese Hoagie</h5>
+        <p class="card-text">American Cheese <br>Calories: 250</p>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</section>
+
+<!-- Call to Action -->
+<section id="order-now" class="bg-primary text-white text-center py-5">
+  <div class="container">
+    <h2>Ready to Order?</h2>
+    <p class="lead">Customize your hoagie and have it ready in no time!</p>
+    <a href="#" class="btn btn-light btn-lg">Order Now</a>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-dark text-white text-center py-4">
+  <div class="container">
+    <p>&copy; 2024 Bensalem High Hoagies. All rights reserved.</p>
+  </div>
+</footer>
+{% endblock %}

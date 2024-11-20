@@ -1,0 +1,63 @@
+# Python bytecode files
+*.py[cod]
+__pycache__/
+*.so
+
+# Virtual environment
+env/
+venv/
+
+# Django-specific files
+*.log
+*.pot
+*.pyc
+*.pyo
+*.sqlite3
+db.sqlite3
+
+# Static files
+staticfiles/
+static/
+
+# Media files
+media/
+
+# Node modules (if using Node.js for front-end assets)
+node_modules/
+
+# IDE-specific files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Test and coverage files
+.coverage
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.tox/
+.nox/
+*.pytest_cache/
+htmlcov/
+
+# Environment variables
+.env
+.env.*
+
+# Build files
+*.egg-info/
+dist/
+build/
+
+# Migrations (optional, if not versioning migrations)
+migrations/
+
+# JetBrains Rider project files
+*.iml
+out/
