@@ -1,0 +1,14 @@
+{% extends 'base.html'%}
+{% load static%}
+
+{% block content%}
+<div class="container my-4">
+    <h1 class="text-danger text-center">Delete Menu</h1>
+    <p>Are you sure you want to delete "{{ menu.name }}"?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+        <a href="{% url 'menu_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

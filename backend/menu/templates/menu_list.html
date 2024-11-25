@@ -1,0 +1,28 @@
+{% extends 'base.html'%}
+{% load static%}
+
+{% block content%}
+<div class="container my-4">
+    <h1 class="text-primary text-center">Menu List</h1>
+    <a href="{% url 'menu_create' %}" class="btn btn-primary mb-3">Add Menu</a>
+    <div class="row">
+        {% for menu in menus %}
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <a href="{% url 'menu_detail' pk=menu.pk %}">
+                    <img src="{{ menu.image.url }}" class="card-img-top" alt="{{ menu.name }}">
+                </a>
+                <div class="card-body">
+                    <h5 class="card-title">{{ menu.name }}</h5>
+                    <p class="card-text">{{ menu.ingredients|truncatechars:100 }}</p>
+                    <a href="{% url 'menu_update' menu.pk %}" class="btn btn-success">Edit</a>
+                    <a href="{% url 'menu_delete' menu.pk %}" class="btn btn-danger">Delete</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-muted">No menus available.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
