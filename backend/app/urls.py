@@ -32,4 +32,5 @@ urlpatterns = [
     path("logout/", logout_confirm, name="logout_confirm"),  # Confirmation page
     path("logout-confirmed/", LogoutView.as_view(next_page="home"), name="logout"),
     path("menu/", include("menu.urls")),
+    path("order/", include("order.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load static%}
 {% block content %}
 <header class="bg-light text-center py-5">
   <div class="container">
@@ -24,10 +24,19 @@
           </div>
           <div class="card-body text-center">
             <h5 class="card-title">{{ menu.name }}</h5>
+            <h5 class="card-title">
+              {% if menu.is_toast %}
+              Toasted Hoagie
+              {% else %}
+              Non-Toasted Hoagie
+              {% endif %}
+            </h5>
             <p class="card-text">{{ menu.ingredients|truncatechars:100 }}</p>
           </div>
         </div>
       </div>
+      {% empty %}
+      <p class="text-center">No hoagies available at the moment. Please check back later!</p>
       {% endfor %}
     </div>
   </div>

@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section id="menu-detail" class="py-5 bg-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <!-- Menu Image -->
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-lg border-0">
+                    <img src="{{ menu.image.url }}" class="card-img-top img-fluid rounded" alt="{{ menu.name }}">
+                </div>
+            </div>
+
+            <!-- Menu Information -->
+            <div class="col-md-6">
+                <div class="card shadow-lg border-0 p-4">
+                    <h2 class="mb-3 text-center">{{ menu.name }}</h2>
+                    <p class="lead"><strong>Ingredients:</strong> {{ menu.ingredients }}</p>
+
+                    {% if menu.is_toast %}
+                    <p class="text-success"><strong>This item is toasted!</strong></p>
+                    {% endif %}
+
+                    <!-- Toppings List -->
+                    <form method="POST">
+                        {% csrf_token %}
+                        <h4 class="mt-3"><strong>Toppings:</strong></h4>
+                        <div class="d-flex flex-wrap">
+                            {% for topping in toppings %}
+                            <div class="topping-option" data-topping-id="{{ topping.id }}"
+                                onclick="toggleTopping(this)">
+                                <button type="button" class="badge bg-secondary me-2 mb-2">{{ topping.name }}</button>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Toast Option -->
+                        {% if menu.is_toast %}
+                        <div class="form-check mt-3">
+                            <input type="checkbox" name="is_toasted" class="form-check-input" id="isToasted">
+                            <label class="form-check-label" for="isToasted">Toast the item?</label>
+                        </div>
+                        {% endif %}
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-success btn-lg mt-4">
+                            <i class="bi bi-cart-plus"></i> Order Now
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    function toggleTopping(element) {
+        element.classList.toggle("selected");
+        const toppingId = element.getAttribute("data-topping-id");
+        const toppingsField = document.querySelector("form");
+
+        if (element.classList.contains("selected")) {
+            let input = document.createElement("input");
+            input.type = "hidden";
+            input.name = "toppings";
+            input.value = toppingId;
+            toppingsField.appendChild(input);
+        } else {
+            let inputs = toppingsField.querySelectorAll(`input[name="toppings"][value="${toppingId}"]`);
+            inputs.forEach(input => input.remove());
+        }
+        element.classList.toggle("bg-primary");
+    }
+</script>
+{% endblock %}

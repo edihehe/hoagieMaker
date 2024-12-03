@@ -4,6 +4,10 @@ from django.views.generic import TemplateView
 from menu.models import Menu
 
 
+from django.shortcuts import render
+from menu.models import Menu
+
+
 def home(request):
     menus = Menu.objects.all()
     return render(request, "home.html", {"menus": menus})
