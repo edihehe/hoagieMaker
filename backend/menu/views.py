@@ -80,10 +80,27 @@ def menu_detail(request, pk):
 
 
 # Delete View
+
+
 def menu_delete(request, pk):
     menu = get_object_or_404(Menu, pk=pk)
-    toppings = get_object_or_404(toppings)
+
+    # Initialize toppings only if needed
+    toppings = None
+
+    if hasattr(menu, "toppings"):
+        toppings = menu.toppings.all()  # Safe access to toppings if they exist
+
     if request.method == "POST":
         menu.delete()
-        return redirect("menu_list")
-    return render(request, "menu_confirm_delete.html", {"menu": menu})
+        return redirect("menu_list")  # Redirect to a relevant page after deletion
+
+    # Ensure toppings is defined before rendering (even if empty)
+    return render(
+        request,
+        "menu_delete.html",
+        {
+            "menu": menu,
+            "toppings": toppings or [],  # Provide an empty list if toppings is None
+        },
+    )
