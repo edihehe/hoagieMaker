@@ -58,15 +58,36 @@ from order.forms import OrderForm
 
 
 def menu_detail(request, pk):
-    menu = get_object_or_404(Menu, pk=pk)  # Use pk to fetch the menu item
-    toppings = request.POST.getlist("toppings")  # Get the selected toppings
-    is_toasted = "toastOption" in request.POST  # Check if toasted option is selected
+    menu = get_object_or_404(Menu, pk=pk)  # Fetch the menu item
+    toppings = request.POST.get(
+        "toppings", ""
+    )  # Get the selected toppings as a comma-separated string
+    is_toasted = (
+        "toastOption" in request.POST
+    )  # Check if the toasted option is selected
 
     if request.method == "POST":
         order = Order.objects.create(menu_item=menu, is_toasted=is_toasted)
-        order.toppings.set(toppings)  # Add selected toppings to the order
-        order.save()
 
+        if toppings:  # Ensure toppings is not empty
+            try:
+                topping_ids = [
+                    int(tid) for tid in toppings.split(",")
+                ]  # Convert to a list of integers
+                order.toppings.set(topping_ids)  # Add selected toppings to the order
+            except ValueError:
+                # Handle invalid topping IDs gracefully
+                return render(
+                    request,
+                    "menu_detail.html",
+                    {
+                        "menu": menu,
+                        "toppings": Topping.objects.all(),
+                        "error": "Invalid topping selection.",
+                    },
+                )
+
+        order.save()
         return redirect("order_success", order_id=order.id)
 
     return render(
@@ -74,7 +95,7 @@ def menu_detail(request, pk):
         "menu_detail.html",
         {
             "menu": menu,
-            "toppings": Topping.objects.all(),  # Optionally, pass available toppings to the template
+            "toppings": Topping.objects.all(),  # Pass available toppings to the template
         },
     )
 

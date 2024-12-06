@@ -1,8 +1,105 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Order Successful!</h1>
-<p>Order ID: {{ order.id }}</p>
-<p>Menu Item: {{ order.menu_item.name }}</p>
-<p>Toppings: {% for topping in order.toppings.all %}{{ topping.name }}{% endfor %}</p>
+<!-- Importing required CSS & Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
+<style>
+    /* General Styles */
+    #order-success {
+        background: linear-gradient(135deg, #fff, #f8f9fa);
+        padding: 40px 0;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Card Animation */
+    .success-card {
+        animation: slideIn 1s ease-in-out;
+    }
+
+    /* Animation Keyframe */
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    /* Card Styling */
+    .card {
+        border: none;
+        text-align: center;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        padding: 20px;
+    }
+
+    /* Main Heading */
+    h1 {
+        color: #28a745;
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+    }
+
+    p {
+        font-size: 1.1rem;
+        color: #555;
+    }
+
+    /* Button Styling */
+    .btn-primary {
+        background-color: #007bff;
+        border-radius: 8px;
+        padding: 10px 25px;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+        transform: translateY(-2px);
+    }
+
+    /* Responsiveness */
+    @media (max-width: 768px) {
+        h1 {
+            font-size: 2rem;
+        }
+
+        p {
+            font-size: 1rem;
+        }
+    }
+</style>
+
+<section id="order-success">
+    <div class="container">
+        <div class="card shadow-lg success-card">
+            <!-- Icon with animation -->
+            <i class="bi bi-check-circle-fill" style="font-size: 4rem; color: #28a745;"></i>
+            <h1>✅ Order Successful!</h1>
+            <p><strong>Order ID:</strong> {{ order.id }}</p>
+            <p><strong>Menu Item:</strong> {{ order.menu_item.name }}</p>
+            <p><strong>Toppings:</strong>
+                {% if order.toppings.all %}
+                {% for topping in order.toppings.all %}
+                <span class="badge bg-success">{{ topping.name }}</span>
+                {% endfor %}
+                {% else %}
+                No Toppings
+                {% endif %}
+            </p>
+            <!-- Navigation -->
+            <div class="mt-4">
+                <a href="{% url 'menu_list' %}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-arrow-left-circle"></i> Back to Menu List
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
 {% endblock %}

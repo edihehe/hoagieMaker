@@ -29,3 +29,26 @@ from .models import Order
 def order_success(request, order_id):
     order = Order.objects.get(id=order_id)
     return render(request, "success.html", {"order": order})
+
+
+from django.shortcuts import render, redirect
+from .models import Order
+from menu.models import Menu, Topping
+
+
+def view_orders(request):
+    pending_orders = Order.objects.filter(
+        is_completed=False
+    )  # Orders not yet marked as done
+    completed_orders = Order.objects.filter(
+        is_completed=True
+    )  # Orders already marked as done
+    context = {"pending_orders": pending_orders, "completed_orders": completed_orders}
+    return render(request, "view_orders.html", context)
+
+
+# Mark order as complete (by a cook or admin interface)
+def mark_order_completed(request, order_id):
+    order = Order.objects.get(id=order_id)
+    order.mark_as_completed()
+    return redirect("view_orders")

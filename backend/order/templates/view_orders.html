@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Importing required CSS & Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
+<style>
+    /* General Styles */
+    #dashboard-container {
+        background: linear-gradient(135deg, #fff, #f8f9fa);
+        padding: 20px 0;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Card Animation */
+    .dashboard-card {
+        animation: slideIn 1s ease-in-out;
+    }
+
+    /* Animation Keyframe */
+    /* @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    } */
+
+    /* Styling the header */
+    header h1 {
+        color: #28a745;
+        font-size: 2.5rem;
+        margin-bottom: 0;
+    }
+
+    /* General Paragraphs */
+    p {
+        font-size: 1rem;
+        color: #555;
+    }
+
+    /* Button Styling */
+    .btn-primary {
+        background-color: #007bff;
+        border-radius: 8px;
+        padding: 10px 20px;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+        transform: translateY(-2px);
+    }
+
+    /* Badge for toppings */
+    .badge-success {
+        background-color: #28a745 !important;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        h1 {
+            font-size: 2rem;
+        }
+
+        p {
+            font-size: 0.9rem;
+        }
+    }
+</style>
+
+<!-- Main Dashboard Section -->
+<section id="dashboard-container">
+    <div class="container">
+        <header class="text-center mb-4">
+            <h1>Kitchen Orders Dashboard</h1>
+        </header>
+
+        <!-- Pending Orders Section -->
+        <section class="mb-5">
+            <h2 class="mb-3 text-success">Pending Orders</h2>
+            {% if pending_orders %}
+            <div class="row row-cols-1 row-cols-md-2 g-4">
+                {% for order in pending_orders %}
+                <div class="col">
+                    <div class="card h-100 shadow-lg dashboard-card">
+                        <div class="card-body">
+                            <p><strong>Menu Item:</strong> {{ order.menu_item.name }}</p>
+                            <p><strong>Toppings:</strong>
+                                {% for topping in order.toppings.all %}
+                                <span class="badge badge-success">{{ topping.name }}</span>
+                                {% endfor %}
+                            </p>
+                            <p><strong>Toasted?</strong> {{ order.is_toasted|yesno }}</p>
+                            <p><strong>Created at</strong> {{ order.created_at}}</p>
+
+                        </div>
+                        <div class="card-footer text-center">
+                            <form action="{% url 'mark_order_completed' order.id %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary">Mark as Completed</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted">No pending orders found!</p>
+            {% endif %}
+        </section>
+
+        <!-- Completed Orders Section -->
+        <section>
+            <h2 class="mb-3 text-success">Completed Orders</h2>
+            {% if completed_orders %}
+            <div class="row row-cols-1 row-cols-md-2 g-4">
+                {% for order in completed_orders %}
+                <div class="col">
+                    <div class="card h-100 shadow-lg dashboard-card">
+                        <div class="card-body">
+                            <p><strong>Menu Item:</strong> {{ order.menu_item.name }}</p>
+                            <p><strong>Toppings:</strong>
+                                {% for topping in order.toppings.all %}
+                                <span class="badge badge-success">{{ topping.name }}</span>
+                                {% endfor %}
+                            </p>
+                            <p><strong>Toasted?</strong> {{ order.is_toasted|yesno }}</p>
+                            <p><strong>Completed At:</strong> {{ order.completed_at }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted">No completed orders found yet.</p>
+            {% endif %}
+        </section>
+    </div>
+</section>
+
+<footer class="bg-dark text-white py-3 mt-5">
+    <div class="container text-center">
+        <p class="mb-0">&copy; 2024 Kitchen Orders App</p>
+    </div>
+</footer>
+{% endblock %}

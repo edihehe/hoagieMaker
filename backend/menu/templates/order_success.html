@@ -1,15 +1,91 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section id="order-success" class="py-5 bg-light text-center">
+<!-- Importing required CSS & Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
+<style>
+    /* General Styles */
+    #order-success {
+        background: linear-gradient(135deg, #f8f9fa, #ffffff);
+        padding: 40px 0;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease-in-out;
+    }
+
+    .success-card {
+        animation: fadeIn 1s ease-in-out;
+    }
+
+    /* Card Animation */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Centered content */
+    .card {
+        border: none;
+        text-align: center;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    h2 {
+        color: #28a745;
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+    }
+
+    p.lead {
+        color: #555;
+        font-size: 1.2rem;
+    }
+
+    /* Buttons with animation */
+    .btn-primary {
+        background-color: #007bff;
+        transition: all 0.3s ease;
+        padding: 10px 30px;
+        border-radius: 8px;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+        transform: translateY(-2px);
+    }
+
+    /* Responsive Styling */
+    @media (max-width: 768px) {
+        h2 {
+            font-size: 2rem;
+        }
+
+        p.lead {
+            font-size: 1rem;
+        }
+    }
+</style>
+
+<section id="order-success">
     <div class="container">
-        <div class="card shadow-lg border-0 p-4">
-            <h2 class="text-success">Order Successful!</h2>
-            <p class="lead">Thank you for ordering {{ order.menu_item.name }}.</p>
-            <p>Quantity: {{ order.quantity }}</p>
-            <a href="{% url 'menu_list' %}" class="btn btn-primary btn-lg mt-3">
-                <i class="bi bi-arrow-left-circle"></i> Back to Menu List
-            </a>
+        <div class="card shadow-lg success-card p-4">
+            <i class="bi bi-check-circle-fill" style="font-size: 4rem; color: #28a745;"></i>
+            <h2>✅ Order Successful!</h2>
+            <p class="lead">Thank you for ordering <strong>{{ order.menu_item.name }}</strong>.</p>
+            <p>🛒 Quantity: <strong>{{ order.quantity }}</strong></p>
+            <div class="mt-3">
+                <a href="{% url 'menu_list' %}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-arrow-left-circle"></i> Back to Menu List
+                </a>
+            </div>
         </div>
     </div>
 </section>
