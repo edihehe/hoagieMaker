@@ -9,10 +9,8 @@ class MenuForm(forms.ModelForm):
         fields = ["name", "image", "ingredients", "is_toast"]
 
 
-ToppingFormSet = inlineformset_factory(
-    Menu,
-    Topping,
-    fields=["name"],  # Fields to display for Topping
-    extra=1,  # Extra empty forms
-    can_delete=True,  # Allow deletion of toppings
-)
+class ToppingForm(forms.ModelForm):
+    class Meta:
+        model = Topping
+        fields = ["name"]
+        widgets = {"name": forms.TextInput(attrs={"class": "form-control"})}

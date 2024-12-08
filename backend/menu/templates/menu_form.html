@@ -20,26 +20,34 @@
                         <!-- Topping formset -->
                         <div class="mb-2">
                             <h4 class="fw-bold">Toppings</h4>
-                            {{ formset.management_form }} <!-- Include management form for formset -->
+                            {{ formset.management_form }}
                             <div id="topping-forms">
+                                html
+                                Copy code
                                 {% for form in formset %}
                                 <div class="topping-form border p-3 mb-3 rounded shadow-sm position-relative">
                                     <div class="mb-3">
-                                        {{ form.as_p }} <!-- Render the name field of the topping -->
+                                        {{ form.as_p }}
                                     </div>
-
-                                    <!-- Remove button for topping form -->
+                                    {% if form.instance.id %}
                                     <button type="button"
                                         class="btn btn-danger btn-sm remove-topping position-absolute top-0 end-0"
-                                        data-form-id="{{ form.prefix }}">
+                                        data-topping-id="{{ form.instance.id }}">
                                         <i class="bi bi-x-circle"></i> Remove
                                     </button>
+                                    {% else %}
+                                    <button type="button"
+                                        class="btn btn-danger btn-sm remove-topping position-absolute top-0 end-0"
+                                        data-topping-id="">
+                                        <i class="bi bi-x-circle"></i> Remove
+                                    </button>
+                                    {% endif %}
                                 </div>
                                 {% endfor %}
                             </div>
                         </div>
 
-                        <!-- Button to add more toppings -->
+                        <!-- Button to dynamically add more toppings -->
                         <button type="button" id="add-topping" class="btn btn-outline-secondary w-100 py-2 mt-3">Add
                             Topping</button>
 
@@ -54,63 +62,65 @@
         </div>
     </div>
 </div>
-
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const addToppingBtn = document.getElementById('add-topping');
         const toppingFormsContainer = document.getElementById('topping-forms');
         const totalForms = document.getElementById('id_form-TOTAL_FORMS');
-
-        // Function to update form indices
-        const updateFormIndices = () => {
-            const forms = toppingFormsContainer.querySelectorAll('.topping-form');
-            forms.forEach((form, index) => {
-                form.querySelectorAll('input, select, textarea, label').forEach(element => {
-                    if (element.name) element.name = element.name.replace(/form-\d+-/, `form-${index}-`);
-                    if (element.id) element.id = element.id.replace(/form-\d+-/, `form-${index}-`);
-                    if (element.htmlFor) element.htmlFor = element.htmlFor.replace(/form-\d+-/, `form-${index}-`);
-                });
-                form.querySelector('.remove-topping').dataset.formId = `form-${index}`;
-            });
-        };
-
-        // Add new topping form
-        addToppingBtn.addEventListener('click', () => {
-            const forms = toppingFormsContainer.querySelectorAll('.topping-form');
-            const newIndex = forms.length;
-
-            // Clone last form
-            const newForm = forms[forms.length - 1].cloneNode(true);
-
-            // Update attributes
-            newForm.querySelectorAll('input, select, textarea').forEach(input => {
-                input.name = input.name.replace(/form-\d+-/, `form-${newIndex}-`);
-                input.id = input.id.replace(/form-\d+-/, `form-${newIndex}-`);
-                input.value = '';
-                if (input.type === 'checkbox') input.checked = false;
-            });
-
-            toppingFormsContainer.appendChild(newForm);
-            totalForms.value = newIndex + 1;
+        document.getElementById("add-topping").addEventListener("click", () => {
+            const formIdx = parseInt(totalForms.value);
+            const newFormHtml = `
+            <div class="topping-form border p-3 mb-3 rounded shadow-sm">
+                <div class="mb-3">
+                    <label for="id_form-${formIdx}-name">Topping Name:</label>
+                    <input type="text" name="form-${formIdx}-name" class="form-control">
+                </div>
+                <button type="button" class="btn btn-danger btn-sm remove-topping">Remove</button>
+            </div>
+        `;
+            toppingFormsContainer.insertAdjacentHTML('beforeend', newFormHtml);
+            totalForms.value = formIdx + 1;
         });
-
-        // Remove topping form
-        toppingFormsContainer.addEventListener('click', (e) => {
+        toppingFormsContainer.addEventListener('click', async (e) => {
             if (e.target.classList.contains('remove-topping')) {
                 const formToRemove = e.target.closest('.topping-form');
-                const deleteCheckbox = formToRemove.querySelector('input[name$="-DELETE"]');
+                const toppingId = e.target.dataset.toppingId;
 
-                if (deleteCheckbox) {
-                    deleteCheckbox.checked = true;
-                    formToRemove.style.display = 'none';
-                } else {
-                    formToRemove.remove();
+                console.log("Topping ID:", toppingId); // Log this value to debug
+
+                if (!toppingId) {
+                    alert("Invalid Topping ID. Cannot delete.");
+                    return;
                 }
 
-                updateFormIndices();
-                totalForms.value = toppingFormsContainer.querySelectorAll('.topping-form').length;
+                try {
+                    const response = await fetch("/menu/delete-topping/", {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": '{{ csrf_token }}',
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ topping_id: toppingId })
+                    });
+
+                    const result = await response.json();
+                    console.log("Server response:", result);
+
+                    if (result.status === 'success') {
+                        formToRemove.style.display = "none";
+                        totalForms.value = toppingFormsContainer.querySelectorAll('.topping-form:not([style*="display: none"])').length;
+                    } else {
+                        alert(result.message || "Failed to delete topping.");
+                    }
+                } catch (error) {
+                    console.error("Unexpected error:", error);
+                    alert("Error occurred while deleting.");
+                }
             }
         });
     });
+
 </script>
+
+
+
 {% endblock %}
