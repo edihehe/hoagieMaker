@@ -188,7 +188,9 @@ def menu_update(request, pk):
     menu = get_object_or_404(Menu, pk=pk)
 
     # Set up the formset with modelformset_factory
-    ToppingFormSet = modelformset_factory(Topping, form=ToppingForm, extra=1)
+    ToppingFormSet = modelformset_factory(
+        Topping, form=ToppingForm, extra=1, can_delete=True
+    )
 
     if request.method == "POST":
         form = MenuForm(request.POST, request.FILES, instance=menu)
@@ -206,9 +208,12 @@ def menu_update(request, pk):
                     if topping_form.instance.pk:
                         topping_form.instance.delete()
                 else:
-                    topping = topping_form.save(commit=False)
-                    topping.menu = menu
-                    topping.save()
+                    # Check if the form has meaningful data
+                    topping_data = topping_form.cleaned_data
+                    if topping_data.get("name") and topping_data.get("description"):
+                        topping = topping_form.save(commit=False)
+                        topping.menu = menu
+                        topping.save()
 
             return redirect("menu_list")
     else:

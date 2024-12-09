@@ -29,19 +29,6 @@
                                     <div class="mb-3">
                                         {{ form.as_p }}
                                     </div>
-                                    {% if form.instance.id %}
-                                    <button type="button"
-                                        class="btn btn-danger btn-sm remove-topping position-absolute top-0 end-0"
-                                        data-topping-id="{{ form.instance.id }}">
-                                        <i class="bi bi-x-circle"></i> Remove
-                                    </button>
-                                    {% else %}
-                                    <button type="button"
-                                        class="btn btn-danger btn-sm remove-topping position-absolute top-0 end-0"
-                                        data-topping-id="">
-                                        <i class="bi bi-x-circle"></i> Remove
-                                    </button>
-                                    {% endif %}
                                 </div>
                                 {% endfor %}
                             </div>
@@ -79,6 +66,19 @@
         `;
             toppingFormsContainer.insertAdjacentHTML('beforeend', newFormHtml);
             totalForms.value = formIdx + 1;
+        });
+        document.addEventListener("DOMContentLoaded", function () {
+            const deleteCheckboxes = document.querySelectorAll(".delete-checkbox");
+
+            deleteCheckboxes.forEach(function (checkbox) {
+                checkbox.addEventListener("change", function (e) {
+                    if (e.target.checked) {
+                        console.log("Checkbox checked for deletion:", e.target);
+                    } else {
+                        console.log("Checkbox unchecked.");
+                    }
+                });
+            });
         });
         toppingFormsContainer.addEventListener('click', async (e) => {
             if (e.target.classList.contains('remove-topping')) {
