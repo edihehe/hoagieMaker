@@ -5,20 +5,55 @@ from django.forms import modelformset_factory
 
 
 class MenuForm(forms.ModelForm):
+
     class Meta:
         model = Menu
-        fields = ["name", "image", "ingredients", "is_toast"]
+        fields = [
+            "name",
+            "image",
+            "ingredients",
+            "is_toast",
+        ]
         widgets = {
-            "name": forms.TextInput(attrs={"class": "form-control"}),
+            "name": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "aria-label": "Sizing example input",
+                    "aria-describedby": "inputGroup-sizing-default",
+                }
+            ),
             "image": forms.ClearableFileInput(attrs={"class": "form-control-file"}),
-            "ingredients": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+            "ingredients": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Leave a comment here",
+                    "row": 3,
+                }
+            ),
+            "is_toast": forms.CheckboxInput(
+                attrs={"class": "form-check-input", "role": "switch"}
+            ),
+            # Specific logic for checkboxes
         }
 
-    # You can also override `__init__` if needed
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for field in self.fields.values():
-            field.widget.attrs["class"] = "form-control"
+        self.fields["ingredients"].widget = forms.Textarea(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Leave a comment here",
+                "style": "height: 100px",
+                "id": "floatingTextarea2",
+            }
+        )
+        self.fields["is_toast"].widget.attrs.update({"class": "form-check-input"})
+        # Dynamically set default classes for other fields except `is_toast`.
+        for field_name, field in self.fields.items():
+            if field_name != "is_toast":  # Skip the checkbox
+                field.widget.attrs["class"] = "form-control"
+            else:
+                # Ensure only the checkbox has its own specific classes
+                field.widget.attrs.update({"class": "form-check-input"})
 
 
 class ToppingForm(forms.ModelForm):
@@ -26,8 +61,13 @@ class ToppingForm(forms.ModelForm):
         model = Topping
         fields = ["name"]
         widgets = {
-            "name": forms.TextInput(attrs={"class": "form-control"}),
-            "DELETE": forms.CheckboxInput(attrs={"class": "delete-checkbox"}),
+            "name": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Default input",
+                    "aria-label": "Topping's name",
+                }
+            ),
         }
 
 

@@ -11,10 +11,24 @@
                 <div class="card-body">
                     <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
-
-                        <!-- Menu form fields -->
                         <div class="mb-4">
-                            {{ form.as_p }}
+                            <div class="input-group mb-3">
+                                <span class="input-group-text">Menu Name</span>
+                                {{ form.name }}
+                            </div>
+                            <div class="mb-3">
+
+                                {{ form.image }}
+                            </div>
+                            <div class="form-floating mb-3">
+                                {{ form.ingredients }}
+                                <label for="floatingTextarea2">Ingredients</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                {{ form.is_toast }}
+                                <label class="form-check-label" for="{{ form.is_toast.id_for_label }}">Toast
+                                    Option</label>
+                            </div>
                         </div>
 
                         <!-- Topping formset -->
@@ -22,8 +36,7 @@
                             <h4 class="fw-bold">Toppings</h4>
                             {{ formset.management_form }}
                             <div id="topping-forms">
-                                html
-                                Copy code
+
                                 {% for form in formset %}
                                 <div class="topping-form border p-3 mb-3 rounded shadow-sm position-relative">
                                     <div class="mb-3">
@@ -120,7 +133,17 @@
     });
 
 </script>
+<style>
+    .form-check-input {
+        height: 1.2em;
+        width: 1.2em;
+    }
 
+    .form-check-label {
+        cursor: pointer;
+        padding-left: 4px;
+    }
+</style>
 
 
 {% endblock %}

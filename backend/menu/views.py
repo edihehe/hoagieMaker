@@ -38,66 +38,26 @@ def menu_create(request):
     )
 
 
-# def menu_update(request, pk):
-#     menu = get_object_or_404(Menu, pk=pk)
-
-#     # Set up the formset with modelformset_factory
-#     ToppingFormSet = modelformset_factory(Topping, form=ToppingForm, extra=1)
-
-#     if request.method == "POST":
-#         form = MenuForm(request.POST, request.FILES, instance=menu)
-#         formset = ToppingFormSet(
-#             request.POST, queryset=Topping.objects.filter(menu=menu)
-#         )
-
-#         if form.is_valid() and formset.is_valid():
-#             # Save the main menu form
-#             form.save()
-
-#             # Process the formset
-#             for topping_form in formset:
-#                 # Handle deletion logic
-#                 if topping_form.cleaned_data.get("DELETE", False):
-#                     if (
-#                         topping_form.instance.pk
-#                     ):  # Ensure only valid deletions are processed
-#                         topping_form.instance.delete()
-#                 else:
-#                     topping = topping_form.save(commit=False)
-#                     topping.menu = menu  # Associate with the menu
-#                     topping.save()
-
-#             return redirect("menu_list")
-#     else:
-#         form = MenuForm(instance=menu)
-#         formset = ToppingFormSet(queryset=Topping.objects.filter(menu=menu))
-
-#     return render(
-#         request,
-#         "menu_form.html",
-#         {"form": form, "formset": formset, "action": "Update Menu"},
-#     )
-
-
 from order.forms import OrderForm
 
 
 def menu_detail(request, pk):
-    menu = get_object_or_404(Menu, pk=pk)  # Fetch the menu item
-    toppings = request.POST.get(
-        "toppings", ""
-    )  # Get the selected toppings as a comma-separated string
+    menu = get_object_or_404(Menu, pk=pk)  # Fetch the specific menu item
+    toppings = menu.toppings.all()  # Fetch toppings associated with the specific menu
     is_toasted = (
         "toastOption" in request.POST
     )  # Check if the toasted option is selected
 
     if request.method == "POST":
+        toppings_selected = request.POST.get(
+            "toppings", ""
+        )  # Selected toppings as a string
         order = Order.objects.create(menu_item=menu, is_toasted=is_toasted)
 
-        if toppings:  # Ensure toppings is not empty
+        if toppings_selected:  # Ensure toppings_selected is not empty
             try:
                 topping_ids = [
-                    int(tid) for tid in toppings.split(",")
+                    int(tid) for tid in toppings_selected.split(",")
                 ]  # Convert to a list of integers
                 order.toppings.set(topping_ids)  # Add selected toppings to the order
             except ValueError:
@@ -107,7 +67,7 @@ def menu_detail(request, pk):
                     "menu_detail.html",
                     {
                         "menu": menu,
-                        "toppings": Topping.objects.all(),
+                        "toppings": toppings,
                         "error": "Invalid topping selection.",
                     },
                 )
@@ -120,7 +80,7 @@ def menu_detail(request, pk):
         "menu_detail.html",
         {
             "menu": menu,
-            "toppings": Topping.objects.all(),  # Pass available toppings to the template
+            "toppings": toppings,  # Pass filtered toppings to the template
         },
     )
 
@@ -193,30 +153,41 @@ def menu_update(request, pk):
     )
 
     if request.method == "POST":
+        # Handle the main menu form
         form = MenuForm(request.POST, request.FILES, instance=menu)
+
+        # Handle the formset with all submitted data
         formset = ToppingFormSet(
             request.POST, queryset=Topping.objects.filter(menu=menu)
         )
 
         if form.is_valid() and formset.is_valid():
+            # Save the main menu
             form.save()
 
-            # Process the formset
+            # Save only valid toppings (ignore empty ones)
             for topping_form in formset:
-                # Handle deletion logic
                 if topping_form.cleaned_data.get("DELETE", False):
+                    # Delete the item if marked for deletion
                     if topping_form.instance.pk:
                         topping_form.instance.delete()
                 else:
-                    # Check if the form has meaningful data
-                    topping_data = topping_form.cleaned_data
-                    if topping_data.get("name") and topping_data.get("description"):
+                    # Only save if essential fields are not empty
+                    name = topping_form.cleaned_data.get("name")
+                    description = topping_form.cleaned_data.get("description")
+
+                    if name or description:  # Ensure at least one field is populated
                         topping = topping_form.save(commit=False)
                         topping.menu = menu
                         topping.save()
 
             return redirect("menu_list")
+        else:
+            print("Form errors:", form.errors)
+            print("Formset errors:", formset.errors)
+
     else:
+        # Render empty menu with an initialized formset
         form = MenuForm(instance=menu)
         formset = ToppingFormSet(queryset=Topping.objects.filter(menu=menu))
 
