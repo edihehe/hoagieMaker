@@ -17,19 +17,6 @@
         animation: slideIn 1s ease-in-out;
     }
 
-    /* Animation Keyframe */
-    /* @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateX(-20px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    } */
-
     /* Styling the header */
     header h1 {
         color: #28a745;
@@ -56,20 +43,18 @@
         transform: translateY(-2px);
     }
 
+    .btn-danger {
+        border-radius: 8px;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .btn-danger:hover {
+        transform: translateY(-2px);
+    }
+
     /* Badge for toppings */
     .badge-success {
         background-color: #28a745 !important;
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-        h1 {
-            font-size: 2rem;
-        }
-
-        p {
-            font-size: 0.9rem;
-        }
     }
 </style>
 
@@ -84,11 +69,12 @@
         <section class="mb-5">
             <h2 class="mb-3 text-success">Pending Orders</h2>
             {% if pending_orders %}
-            <div class="row row-cols-1 row-cols-md-2 g-4">
+            <div class="row row-cols-1 row-cols-md-3 g-4">
                 {% for order in pending_orders %}
                 <div class="col">
                     <div class="card h-100 shadow-lg dashboard-card">
                         <div class="card-body">
+                            <h1>{{ order.customer }}</h1>
                             <p><strong>Menu Item:</strong> {{ order.menu_item.name }}</p>
                             <p><strong>Toppings:</strong>
                                 {% for topping in order.toppings.all %}
@@ -96,14 +82,41 @@
                                 {% endfor %}
                             </p>
                             <p><strong>Toasted?</strong> {{ order.is_toasted|yesno }}</p>
-                            <p><strong>Created at</strong> {{ order.created_at}}</p>
-
+                            <p><strong>Created at</strong> {{ order.created_at }}</p>
                         </div>
                         <div class="card-footer text-center">
-                            <form action="{% url 'mark_order_completed' order.id %}" method="post">
+                            <form action="{% url 'mark_order_completed' order.id %}" method="post" class="d-inline">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-primary">Mark as Completed</button>
                             </form>
+
+                            <!-- Delete Button with Bootstrap Modal -->
+                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ order.id }}">
+                                Delete
+                            </button>
+
+                            <!-- Delete Confirmation Modal -->
+                            <div class="modal fade" id="deleteModal{{ order.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ order.id }}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="deleteModalLabel{{ order.id }}">Confirm Deletion</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Are you sure you want to delete this order for <strong>{{ order.menu_item.name }}</strong>?
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <form action="{% url 'delete_order' order.id %}" method="post" class="d-inline">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- End of Modal -->
                         </div>
                     </div>
                 </div>
@@ -118,7 +131,7 @@
         <section>
             <h2 class="mb-3 text-success">Completed Orders</h2>
             {% if completed_orders %}
-            <div class="row row-cols-1 row-cols-md-2 g-4">
+            <div class="row row-cols-1 row-cols-md-3 g-4">
                 {% for order in completed_orders %}
                 <div class="col">
                     <div class="card h-100 shadow-lg dashboard-card">
@@ -148,4 +161,8 @@
         <p class="mb-0">&copy; 2024 Kitchen Orders App</p>
     </div>
 </footer>
+
+<!-- Bootstrap 5 JS (for modal functionality) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 {% endblock %}

@@ -25,6 +25,7 @@ from django.conf import settings
 
 urlpatterns = [
     path("", landing_page, name="landing_page"),
+    path("orders/", orders, name="orders"),
     path("admin/", admin.site.urls),
     path(
         "login/", auth_views.LoginView.as_view(template_name="login.html"), name="login"
@@ -33,5 +34,6 @@ urlpatterns = [
     path("logout/", logout_confirm, name="logout_confirm"),  # Confirmation page
     path("logout-confirmed/", LogoutView.as_view(next_page="home"), name="logout"),
     path("menu/", include("menu.urls")),
-    path("order/", include("order.urls")),
+    path("kitchen/", include("order.urls")),
+    # path("delete_order/<int:order_id>/", delete_order, name="cancel_order"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

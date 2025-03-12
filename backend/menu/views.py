@@ -44,21 +44,15 @@ from order.forms import OrderForm
 def menu_detail(request, pk):
     menu = get_object_or_404(Menu, pk=pk)  # Fetch the specific menu item
     toppings = menu.toppings.all()  # Fetch toppings associated with the specific menu
-    is_toasted = (
-        "toastOption" in request.POST
-    )  # Check if the toasted option is selected
+    is_toasted = "toastOption" in request.POST  # Check if the toasted option is selected
 
     if request.method == "POST":
-        toppings_selected = request.POST.get(
-            "toppings", ""
-        )  # Selected toppings as a string
-        order = Order.objects.create(menu_item=menu, is_toasted=is_toasted)
+        toppings_selected = request.POST.get("toppings", "")  # Selected toppings as a string
+        order = Order.objects.create(menu_item=menu, customer=request.user, is_toasted=is_toasted)
 
         if toppings_selected:  # Ensure toppings_selected is not empty
             try:
-                topping_ids = [
-                    int(tid) for tid in toppings_selected.split(",")
-                ]  # Convert to a list of integers
+                topping_ids = [int(tid) for tid in toppings_selected.split(",")]  # Convert to list of integers
                 order.toppings.set(topping_ids)  # Add selected toppings to the order
             except ValueError:
                 # Handle invalid topping IDs gracefully
@@ -83,8 +77,6 @@ def menu_detail(request, pk):
             "toppings": toppings,  # Pass filtered toppings to the template
         },
     )
-
-
 # Delete View
 
 

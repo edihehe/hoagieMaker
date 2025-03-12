@@ -1,9 +1,11 @@
 from django.db import models
 from django.utils import timezone
+from django.contrib.auth.models import User
 from menu.models import Menu, Topping
 
 
 class Order(models.Model):
+    customer = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     menu_item = models.ForeignKey(Menu, on_delete=models.CASCADE)
     toppings = models.ManyToManyField(Topping)
     is_toasted = models.BooleanField(default=False)
@@ -19,4 +21,4 @@ class Order(models.Model):
             self.save()
 
     def __str__(self):
-        return f"Order for {self.menu_item.name} at {self.created_at} - {'Completed' if self.is_completed else 'Pending'}"
+        return f"Order by {self.customer.username} for {self.menu_item.name} at {self.created_at} - {'Completed' if self.is_completed else 'Pending'}"

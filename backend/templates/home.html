@@ -1,44 +1,40 @@
 {% extends "base.html" %}
-{% load static%}
+{% load static %}
 {% block content %}
-<!-- <header class="bg-light text-center py-5">
-  <div class="container">
-    <h1 class="display-5">Welcome to Bensalem High's Hoagie Ordering System</h1>
-    <p class="lead">Order your favorite hoagie today and customize it just how you like!</p>
-  </div>
-</header> -->
+
+
 
 <!-- Hoagie Options Section -->
 <section id="hoagie-options" class="py-5">
-  <div class="container">
-    <h2 class="text-center mb-5">Our Hoagie Options</h2>
-    <div class="row gy-4">
-      {% for menu in menus %}
-      <div class="col-md-6 col-lg-3">
-        <div class="card hoagie-card">
-          <div class="card-img-container">
-            <!-- Link to the menu detail page -->
-            <a href="{% url 'menu_detail' pk=menu.pk %}">
-              <img src="{{ menu.image.url }}" class="card-img-top" alt="{{ menu.name }}">
-            </a>
-          </div>
-          <div class="card-body text-center">
-            <h5 class="card-title">{{ menu.name }}</h5>
-            <h5 class="card-title">
-              {% if menu.is_toast %}
-              Toasted Hoagie
-              {% else %}
-              Non-Toasted Hoagie
-              {% endif %}
-            </h5>
-            <p class="card-text">{{ menu.ingredients|truncatechars:100 }}</p>
-          </div>
+    <div class="container">
+        <h2 class="text-center mb-5">Our Hoagie Options</h2>
+        <div class="row gy-4">
+            {% for menu in menus %}
+            <div class="col-md-6 col-lg-3">
+                <div class="card hoagie-card">
+                    <div class="card-img-container">
+                        <a href="{% url 'menu_detail' pk=menu.pk %}">
+                            <img src="{{ menu.image.url }}" class="card-img-top" alt="{{ menu.name }}">
+                        </a>
+                    </div>
+                    <div class="card-body text-center">
+                        <h5 class="card-title">{{ menu.name }}</h5>
+                        <h5 class="card-title">
+                            {% if menu.is_toast %}
+                            Toasted Hoagie
+                            {% else %}
+                            Non-Toasted Hoagie
+                            {% endif %}
+                        </h5>
+                        <p class="card-text">{{ menu.ingredients|truncatechars:100 }}</p>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-center">No hoagies available at the moment. Please check back later!</p>
+            {% endfor %}
         </div>
-      </div>
-      {% empty %}
-      <p class="text-center">No hoagies available at the moment. Please check back later!</p>
-      {% endfor %}
     </div>
-  </div>
 </section>
+
 {% endblock %}

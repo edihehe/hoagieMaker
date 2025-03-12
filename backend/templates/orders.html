@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<section class="container my-5">
+    <h2 class="text-center text-primary mb-4">Your Orders</h2>
+
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-pills justify-content-center mb-4">
+        <li class="nav-item">
+            <a class="nav-link active" id="in-progress-tab" data-bs-toggle="pill" href="#in-progress-orders">In Progress</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="completed-tab" data-bs-toggle="pill" href="#completed-orders">Completed</a>
+        </li>
+    </ul>
+
+    <!-- Orders Content -->
+    <div class="tab-content">
+        <!-- Active Orders Section -->
+        <div class="tab-pane fade show active" id="in-progress-orders">
+            {% if active_orders %}
+            <div class="row gy-3">
+                {% for order in active_orders %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card shadow border-0">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">{{ order.customer }}</h5>
+                            <p><strong>Toppings:</strong>
+                                {% for topping in order.toppings.all %}
+                                <span class="badge bg-success">{{ topping.name }}</span>
+                                {% empty %}
+                                No toppings selected
+                                {% endfor %}
+                            </p>
+                            <p><strong>Toasted?</strong> {{ order.is_toasted|yesno }}</p>
+                            <p><strong>Ordered on:</strong> {{ order.created_at }}</p>
+
+                            <!-- Cancel Order Button -->
+                            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#cancelOrderModal{{ order.id }}">
+                                Cancel
+                            </button>
+
+                            <!-- Cancel Confirmation Modal -->
+                            <div class="modal fade" id="cancelOrderModal{{ order.id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Cancel Order</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Are you sure you want to cancel this order?
+                                        </div>
+                                        <div class="modal-footer">
+                                            <form action="{% url 'delete_order' order.id %}" method="post">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-danger">Yes, Cancel</button>
+                                            </form>
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-center">No active orders.</p>
+            {% endif %}
+        </div>
+
+        <!-- Completed Orders Section -->
+        <div class="tab-pane fade" id="completed-orders">
+            {% if completed_orders %}
+            <div class="row gy-3">
+                {% for order in completed_orders %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card shadow border-0 bg-dark text-light">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">{{ order.customer }}</h5>
+                            <p><strong>Toppings:</strong>
+                                {% for topping in order.toppings.all %}
+                                <span class="badge bg-success">{{ topping.name }}</span>
+                                {% empty %}
+                                No toppings selected
+                                {% endfor %}
+                            </p>
+                            <p><strong>Toasted?</strong> {{ order.is_toasted|yesno }}</p>
+                            <p><strong>Ordered on:</strong> {{ order.created_at }}</p>
+                            <p><strong>Completed on:</strong> {{ order.completed_at }}</p>
+                            <p class="text-warning fw-bold">Completed ✅</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-center">No completed orders.</p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".delete-order-btn").forEach(button => {
+            button.addEventListener("click", function () {
+                const orderId = this.dataset.orderId;
+                const confirmation = confirm("Are you sure you want to cancel this order?");
+                if (!confirmation) return;
+    
+                fetch(`/delete_order/${orderId}/`, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": "{{ csrf_token }}",
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        alert("Order canceled successfully!");
+                        document.getElementById(`order-${orderId}`).remove(); // Remove order from page
+                    } else {
+                        alert("Error: " + data.error);
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+            });
+        });
+    });
+    </script>
+{% endblock %}

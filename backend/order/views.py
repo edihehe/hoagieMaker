@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from .models import Order
 from menu.models import Menu, Topping
 from django.contrib.auth.decorators import login_required
-
+from django.shortcuts import get_object_or_404
 
 def order_menu(request, menu_id):
     if not request.user.is_authenticated:
@@ -52,3 +52,32 @@ def mark_order_completed(request, order_id):
     order = Order.objects.get(id=order_id)
     order.mark_as_completed()
     return redirect("view_orders")
+
+
+# @login_required
+# def delete_order(request, order_id):
+#     order = get_object_or_404(Order, id=order_id)
+
+#     # Ensure only the owner or an admin can delete
+#     if request.user == order.customer or request.user.is_staff:
+#         order.delete()
+#         return redirect("view_orders")  # Redirect to the orders page after deletion
+#     else:
+#         return redirect("view_orders")  # Redirect if unauthorized
+    
+
+@login_required
+def delete_order(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+
+    # Ensure only the owner or an admin can delete
+    if request.user == order.customer or request.user.is_staff:
+        order.delete()
+
+    # Get the previous page URL
+    previous_url = request.META.get('HTTP_REFERER')
+
+    if previous_url:
+        return redirect(previous_url)  # Redirect to the previous page
+    else:
+        return redirect("view_orders")
