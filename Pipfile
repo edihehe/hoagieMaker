@@ -4,8 +4,14 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-django = "*"
 pillow = "*"
+django = "*"
+django-allauth = "*"
+python-decouple = "*"
+requests = "*"
+pyjwt = "*"
+cryptography = "*"
+django-widget-tweaks = "*"
 
 [dev-packages]
 

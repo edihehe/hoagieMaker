@@ -8,7 +8,7 @@ from django.shortcuts import render
 from menu.models import Menu
 
 
-def home(request):
+def landing_page(request):
     menus = Menu.objects.all()
     return render(request, "home.html", {"menus": menus})
 

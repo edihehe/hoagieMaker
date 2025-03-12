@@ -7,14 +7,14 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect
 from order.models import Order
 import json
-
+from django.contrib.auth.decorators import login_required   
 
 # List View
 def menu_list(request):
     menus = Menu.objects.all()
     return render(request, "menu_list.html", {"menus": menus})
 
-
+@login_required
 def menu_create(request):
     ToppingFormSet = modelformset_factory(Topping, form=ToppingForm, extra=1)
 
@@ -40,7 +40,7 @@ def menu_create(request):
 
 from order.forms import OrderForm
 
-
+@login_required
 def menu_detail(request, pk):
     menu = get_object_or_404(Menu, pk=pk)  # Fetch the specific menu item
     toppings = menu.toppings.all()  # Fetch toppings associated with the specific menu

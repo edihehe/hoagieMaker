@@ -12,7 +12,12 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+from decouple import config
 
+GOOGLE_CLIENT_ID = config("GOOGLE_CLIENT_ID")
+GOOGLE_SECRET = config("GOOGLE_SECRET")
+GITHUB_CLIENT_ID = config("GITHUB_CLIENT_ID")
+GITHUB_SECRET = config("GITHUB_SECRET")
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -26,7 +31,7 @@ SECRET_KEY = "django-insecure-kz6d8xv*3h^u6eqn@fcu@&6(9^d4bs0%z(dwys$@cv+k)p+is-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -38,9 +43,24 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    'django.contrib.sites',
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
+    "allauth.socialaccount.providers.github",
+    'widget_tweaks',
     "menu",
     "order",
 ]
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "APP": {"client_id": GOOGLE_CLIENT_ID, "secret": GOOGLE_SECRET, "key": ""}
+    },
+    "github": {
+        "APP": {"client_id": GITHUB_CLIENT_ID, "secret": GITHUB_SECRET, "key": ""}
+    },
+}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -51,6 +71,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
+    "allauth.account.middleware.AccountMiddleware", 
 ]
 
 ROOT_URLCONF = "app.urls"
@@ -73,6 +94,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "app.wsgi.application"
 
+SITE_ID = 1
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -83,7 +105,10 @@ DATABASES = {
         "NAME": BASE_DIR / "db.sqlite3",
     }
 }
-
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # Default authentication
+    'allauth.account.auth_backends.AuthenticationBackend',  # Allauth authentication
+]
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -114,6 +139,7 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 # Redirect to homepage after login/logout
 LOGIN_REDIRECT_URL = "/"
+SOCIALACCOUNT_LOGIN_ON_SUCCESS = 'landing_page'
 LOGOUT_REDIRECT_URL = "/"
 USE_TZ = True
 STATIC_URL = "/static/"
@@ -130,3 +156,16 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+LOGIN_REDIRECT_URL = "landing_page"
+LOGIN_URL = "account_login"
+LOGOUT_URL = "account_logout"
+SIGNUP_REDIRECT_URL = "landing_page"
+SIGNUP_URL = "account_signup"
+ACCOUNT_EMAIL_VERIFICATION = "none"
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_POST = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "aziz9259658@gmail.com"
+EMAIL_HOST_PASSWORD = "enter your password"

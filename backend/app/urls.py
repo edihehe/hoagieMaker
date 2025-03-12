@@ -24,11 +24,12 @@ from django.conf.urls.static import static
 from django.conf import settings
 
 urlpatterns = [
-    path("", home, name="home"),
+    path("", landing_page, name="landing_page"),
     path("admin/", admin.site.urls),
     path(
         "login/", auth_views.LoginView.as_view(template_name="login.html"), name="login"
     ),
+    path("accounts/", include("allauth.urls")),
     path("logout/", logout_confirm, name="logout_confirm"),  # Confirmation page
     path("logout-confirmed/", LogoutView.as_view(next_page="home"), name="logout"),
     path("menu/", include("menu.urls")),

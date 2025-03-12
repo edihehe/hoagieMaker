@@ -4,11 +4,13 @@ from menu.models import Menu, Topping
 from django.contrib.auth.decorators import login_required
 
 
-@login_required
 def order_menu(request, menu_id):
+    if not request.user.is_authenticated:
+        return redirect("account_login")  # Redirect to the Allauth login page
+    
     menu = Menu.objects.get(id=menu_id)
     toppings = Topping.objects.filter(menu=menu)
-
+    
     if request.method == "POST":
         selected_toppings = request.POST.getlist("toppings")
         is_toasted = "is_toasted" in request.POST
@@ -20,7 +22,6 @@ def order_menu(request, menu_id):
         return redirect("order_success", order_id=order.id)
 
     return render(request, "order_menu.html", {"menu": menu, "toppings": toppings})
-
 
 from django.shortcuts import render
 from .models import Order
@@ -35,7 +36,7 @@ from django.shortcuts import render, redirect
 from .models import Order
 from menu.models import Menu, Topping
 
-
+@login_required
 def view_orders(request):
     pending_orders = Order.objects.filter(
         is_completed=False
@@ -47,7 +48,6 @@ def view_orders(request):
     return render(request, "view_orders.html", context)
 
 
-# Mark order as complete (by a cook or admin interface)
 def mark_order_completed(request, order_id):
     order = Order.objects.get(id=order_id)
     order.mark_as_completed()

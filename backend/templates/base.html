@@ -87,17 +87,21 @@
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container">
-      <a class="navbar-brand" href="{% url 'home' %}">Bensalem High Hoagies</a>
+      <a class="navbar-brand" href="{% url 'landing_page' %}">Bensalem High Hoagies</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
         aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Menu</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'landing_page' %}">Menu</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'view_orders' %}">Orders</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'menu_list' %}">Create Menu</a></li>
-          <li class="nav-item"><a class="nav-link" href="#order-now">Order Now</a></li>
+          {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'menu_list' %}">Create Menu</a>
+                </li>
+          {% endif %}
+          <!-- <li class="nav-item"><a class="nav-link" href="#order-now">Order Now</a></li> -->
           {% if user.is_authenticated %}
           <li class="nav-item">
             <span class="nav-link">Welcome, {{ user.username }}</span>
@@ -105,11 +109,12 @@
           <li class="nav-item">
             <form method="post" action="{% url 'logout_confirm' %}" class="d-inline">
               {% csrf_token %}
-              <a href="#" class="nav-link logout-link" onclick="this.closest('form').submit(); return false;">Logout</a>
+              <a href="{% url 'account_logout' %}" class="nav-link logout-link">Logout</a>
             </form>
           </li>
           {% else %}
-          <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
+          <!-- <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li> -->
+          <li class="nav-item"><a class="nav-link" href="{% url 'account_login' %}">Login</a></li>
           {% endif %}
         </ul>
       </div>
