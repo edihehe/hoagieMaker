@@ -25,7 +25,7 @@
                 <div class="col-md-6 col-lg-4">
                     <div class="card shadow border-0">
                         <div class="card-body text-center">
-                            <h5 class="card-title">{{ order.customer }}</h5>
+                            <p><strong>Order ID:</strong> {{ order.id }}</p>
                             <p><strong>Toppings:</strong>
                                 {% for topping in order.toppings.all %}
                                 <span class="badge bg-success">{{ topping.name }}</span>
@@ -81,7 +81,7 @@
                 <div class="col-md-6 col-lg-4">
                     <div class="card shadow border-0 bg-dark text-light">
                         <div class="card-body text-center">
-                            <h5 class="card-title">{{ order.customer }}</h5>
+                            <p><strong>Order ID:</strong> {{ order.id }}</p>
                             <p><strong>Toppings:</strong>
                                 {% for topping in order.toppings.all %}
                                 <span class="badge bg-success">{{ topping.name }}</span>

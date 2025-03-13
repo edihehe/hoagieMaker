@@ -70,11 +70,9 @@ def mark_order_completed(request, order_id):
 def delete_order(request, order_id):
     order = get_object_or_404(Order, id=order_id)
 
-    # Ensure only the owner or an admin can delete
     if request.user == order.customer or request.user.is_staff:
         order.delete()
 
-    # Get the previous page URL
     previous_url = request.META.get('HTTP_REFERER')
 
     if previous_url:

@@ -2,6 +2,62 @@
 {% load static %}
 {% block content %}
 
+<!-- Orders in Progress Section -->
+ 
+{% if user.is_authenticated and orders_in_progress %}
+<!-- <section id="orders-in-progress" class="py-4 bg-light">
+    <div class="container">
+        <h2 class="text-center text-primary mb-4">Orders in Progress</h2>
+        <div class="row gy-3">
+            {% for order in orders_in_progress %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow border-0">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">{{ order.customer }}</h5>
+                        <p><strong>Toppings:</strong>
+                            {% for topping in order.toppings.all %}
+                            <span class="badge bg-success">{{ topping.name }}</span>
+                            {% empty %}
+                            No toppings selected
+                            {% endfor %}
+                        </p>
+                        <p><strong>Toasted?</strong> {{ order.is_toasted|yesno }}</p>
+                        <p><strong>Ordered on:</strong> {{ order.created_at }}</p>
+                        
+                        <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#cancelOrderModal{{ order.id }}">
+                            Cancel
+                        </button>
+
+                        <div class="modal fade" id="cancelOrderModal{{ order.id }}" tabindex="-1" aria-labelledby="cancelOrderLabel{{ order.id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="cancelOrderLabel{{ order.id }}">Cancel Order</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        Are you sure you want to cancel this order?
+                                    </div>
+                                    <div class="modal-footer">
+                                        <form action="{% url 'delete_order' order.id %}" method="post">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger">Yes, Cancel</button>
+                                        </form>
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section> -->
+{% endif %}
+
 
 
 <!-- Hoagie Options Section -->
@@ -11,11 +67,9 @@
         <div class="row gy-4">
             {% for menu in menus %}
             <div class="col-md-6 col-lg-3">
-                <div class="card hoagie-card">
+                <div class="card hoagie-card" data-url="{% url 'menu_detail' pk=menu.pk %}" style="cursor: pointer;">
                     <div class="card-img-container">
-                        <a href="{% url 'menu_detail' pk=menu.pk %}">
-                            <img src="{{ menu.image.url }}" class="card-img-top" alt="{{ menu.name }}">
-                        </a>
+                        <img src="{{ menu.image.url }}" class="card-img-top" alt="{{ menu.name }}">
                     </div>
                     <div class="card-body text-center">
                         <h5 class="card-title">{{ menu.name }}</h5>
@@ -36,5 +90,15 @@
         </div>
     </div>
 </section>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".hoagie-card").forEach(function (card) {
+            card.addEventListener("click", function () {
+                window.location.href = card.getAttribute("data-url");
+            });
+        });
+    });
+</script>
 
 {% endblock %}

@@ -1,28 +1,94 @@
-{% extends 'base.html'%}
-{% load static%}
+{% extends 'base.html' %}
+{% load static %}
 
-{% block content%}
+{% block content %}
 <div class="container my-4">
-    <h1 class="text-primary text-center">Menu List</h1>
-    <a href="{% url 'menu_create' %}" class="btn btn-primary mb-3">Add Menu</a>
-    <div class="row">
+    <h1 class="text-primary text-center fw-bold">Menu List</h1>
+    
+    <div class="d-flex justify-content-center justify-content-md-start mb-4">
+        <a href="{% url 'menu_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Add Menu
+        </a>
+    </div>
+
+    <div class="row gy-4">
         {% for menu in menus %}
-        <div class="col-md-4 mb-3">
-            <div class="card">
-                <a href="{% url 'menu_detail' pk=menu.pk %}">
-                    <img src="{{ menu.image.url }}" class="card-img-top" alt="{{ menu.name }}">
-                </a>
-                <div class="card-body">
-                    <h5 class="card-title">{{ menu.name }}</h5>
-                    <p class="card-text">{{ menu.ingredients|truncatechars:100 }}</p>
-                    <a href="{% url 'menu_update' menu.pk %}" class="btn btn-success">Edit</a>
-                    <a href="{% url 'menu_delete' menu.pk %}" class="btn btn-danger">Delete</a>
+        <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="card hoagie-card shadow-sm border-0" data-url="{% url 'menu_detail' pk=menu.pk %}" style="cursor: pointer;">
+                <div class="card-img-container">
+                    <img src="{{ menu.image.url }}" class="card-img-top img-fluid" alt="{{ menu.name }}">
+                </div>
+                <div class="card-body text-center">
+                    <h5 class="card-title text-primary fw-semibold">{{ menu.name }}</h5>
+                    <p class="card-text text-muted small">{{ menu.ingredients|truncatechars:100 }}</p>
+                    
+                    <!-- Buttons Inside the Card -->
+                    <div class="d-flex justify-content-between mt-3">
+                        <a href="{% url 'menu_update' menu.pk %}" class="btn btn-outline-success btn-sm">
+                            <i class="bi bi-pencil-square"></i> Edit
+                        </a>
+                        <a href="{% url 'menu_delete' menu.pk %}" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-trash"></i> Delete
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
         {% empty %}
-        <p class="text-muted">No menus available.</p>
+        <div class="col-12 text-center">
+            <p class="text-muted">No hoagies available at the moment. Please check back later!</p>
+        </div>
         {% endfor %}
     </div>
 </div>
+
+<style>
+    /* General Layout */
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .hoagie-card {
+        border-radius: 10px;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        background-color: white;
+        padding-bottom: 10px;
+    }
+
+    .hoagie-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-img-container {
+        width: 100%;
+        height: 180px;
+        overflow: hidden;
+    }
+
+    .card-img-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .btn-outline-success, .btn-outline-danger {
+        width: 48%;
+        font-size: 0.85rem;
+        padding: 6px 0;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.hoagie-card').forEach(card => {
+            card.addEventListener('click', function (event) {
+                if (!event.target.closest('.btn')) {
+                    window.location.href = this.getAttribute('data-url');
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}
