@@ -4,10 +4,12 @@
 {% load widget_tweaks %}
 
 {% block title %}
-<title>Login</title>
+Login
 {% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
@@ -27,9 +29,15 @@
                     {% endif %}
                 </div>
 
-                <!-- Password field -->
+                <!-- Password field with Eye Icon at the End -->
                 <div class="mb-3">
-                    {{ form.password|add_class:"form-control" }}
+                    <div class="input-group">
+                        {{ form.password|add_class:"form-control" }}
+                        <button type="button" class="btn btn-outline-secondary" id="togglePassword">
+                            <i class="bi bi-eye-slash-fill"></i>
+                        </button>
+                    </div>
+
                     {% if form.password.errors %}
                     <div class="error-list">
                         {% for error in form.password.errors %}
@@ -70,13 +78,20 @@
         </div>
     </div>
 </div>
+
+<!-- Password Toggle Script -->
 <script>
-    window.addEventListener('load', function() {
-        var inputs = document.querySelectorAll('.form-control');
-        inputs.forEach(function(input) {
-            input.style.width = '100%';  // Ensure input fields take up the full width
-            input.style.padding = '10px'; // Adjust padding to make the inputs bigger
-        });
+    document.getElementById("togglePassword").addEventListener("click", function () {
+        const passwordInput = document.querySelector("input[name='{{ form.password.name }}']");
+        const icon = this.querySelector("i");
+
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            icon.classList.replace("bi-eye-slash-fill", "bi-eye-fill");
+        } else {
+            passwordInput.type = "password";
+            icon.classList.replace("bi-eye-fill", "bi-eye-slash-fill");
+        }
     });
 </script>
 

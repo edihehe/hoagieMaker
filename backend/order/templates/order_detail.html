@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center mt">
+    <div class="card shadow-lg border-0 p-3 {% if order.is_completed %}border-success opacity-75{% endif %}" style="max-width: 500px; width: 100%;">
+        <div class="card-header text-white text-center {% if order.is_completed %}bg-success{% else %}bg-primary{% endif %}">
+            <h2 class="mb-0">{% if order.is_completed %}Order completed ✅{% else %}Order Details{% endif %}</h2>
+        </div>
+        <div class="card-body text-center">
+            <h4 class="fw-bold">{{ order.customer }}</h4>
+            <p><strong>Order ID:</strong> {{ order.id }}</p>
+            <p><strong>Menu Item:</strong> {{ order.menu_item.name }}</p>
+            <p><strong>Toppings:</strong> 
+                {% for topping in order.toppings.all %}
+                    <span class="badge bg-success">{{ topping.name }}</span>
+                {% empty %}
+                    None
+                {% endfor %}
+            </p>
+            <p><strong>Toasted?</strong> {{ order.is_toasted|yesno }}</p>
+            <p><strong>Created at:</strong> {{ order.created_at }}</p>
+            <p><strong>Completed at:</strong> {{ order.completed_at }}</p>
+
+            {% if order.is_completed %}
+                <div class="alert alert-success fw-bold mt-3">This order has been completed ✅</div>
+            {% endif %}
+            
+            <div class="d-flex flex-column gap-2 mt-3">
+                {% if not order.is_completed %}
+                    <form action="{% url 'mark_order_completed' order.id %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary w-100" {% if order.is_completed %}disabled{% endif %}>
+                            Mark as Completed
+                        </button>
+                    </form>
+                {% endif %}
+
+                <!-- Delete button triggers modal -->
+                <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    Delete
+                </button>
+
+                <a href="{% url 'view_orders' %}" class="btn btn-secondary w-100">Back to Orders</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-danger">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete <strong>Order #{{ order.id }}</strong> for <strong>{{ order.customer }}</strong>? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="{% url 'kitchen_delete_order' order.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

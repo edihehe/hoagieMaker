@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "menu",
     "order",
 ]
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
         "APP": {"client_id": GOOGLE_CLIENT_ID, "secret": GOOGLE_SECRET, "key": ""}

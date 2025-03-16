@@ -1,143 +1,200 @@
 {% extends "base.html" %}
 
 {% block content %}
-<!-- Importing required CSS & Icons -->
+<!-- Import Bootstrap Icons -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
+
 <style>
-    /* General Styles */
+    body {
+        background-color: #f8f9fa;
+    }
+
     #dashboard-container {
-        background: linear-gradient(135deg, #fff, #f8f9fa);
-        padding: 20px 0;
-        border-radius: 8px;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
 
-    /* Card Animation */
+    h1,
+    h2 {
+        color: #003366;
+    }
+
+    .search-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .search-dropdown {
+        width: 150px;
+    }
+
+    .search-input {
+        flex-grow: 1;
+        max-width: 400px;
+    }
+
     .dashboard-card {
-        animation: slideIn 1s ease-in-out;
-    }
-
-    /* Styling the header */
-    header h1 {
-        color: #28a745;
-        font-size: 2.5rem;
-        margin-bottom: 0;
-    }
-
-    /* General Paragraphs */
-    p {
-        font-size: 1rem;
-        color: #555;
-    }
-
-    /* Button Styling */
-    .btn-primary {
-        background-color: #007bff;
+        border: 1px solid #dee2e6;
         border-radius: 8px;
-        padding: 10px 20px;
-        transition: all 0.3s ease-in-out;
+        transition: transform 0.3s ease-in-out;
+        background: #ffffff;
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-footer {
+        background: #f1f1f1;
+    }
+
+    .badge-success {
+        background-color: #007bff;
+    }
+
+    .btn-primary {
+        background-color: #003366;
+        border: none;
     }
 
     .btn-primary:hover {
-        background-color: #0056b3;
-        transform: translateY(-2px);
+        background-color: #002244;
     }
 
     .btn-danger {
-        border-radius: 8px;
-        transition: all 0.3s ease-in-out;
+        background-color: #990000;
+        border: none;
     }
 
     .btn-danger:hover {
-        transform: translateY(-2px);
+        background-color: #770000;
     }
 
-    /* Badge for toppings */
-    .badge-success {
-        background-color: #28a745 !important;
+    /* Hide Completed Orders Initially */
+    #completed-orders {
+        display: none;
     }
 </style>
 
-<!-- Main Dashboard Section -->
 <section id="dashboard-container">
     <div class="container">
         <header class="text-center mb-4">
             <h1>Kitchen Orders Dashboard</h1>
         </header>
 
-        <!-- Pending Orders Section -->
-        <section class="mb-5">
-            <h2 class="mb-3 text-success">Pending Orders</h2>
+        <!-- Search & Toggle Buttons -->
+        <div class="container-fluid bg-light p-3 rounded shadow-sm">
+            <div class="row g-2 align-items-center">
+                <!-- Search Bar with Smaller Dropdown -->
+                <div class="col-12 col-md-8">
+                    <div class="input-group">
+                        <span class="input-group-text bg-primary text-white"><i class="bi bi-search"></i></span>
+                        <input type="text" id="search-input" class="form-control" placeholder="Search orders...">
+                        <select id="search-category" class="form-select" style="max-width: 80px;">
+                            <option value="id">ID</option>
+                            <option value="name">Name</option>
+                            <option value="menu">Menu</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Toggle Button -->
+                <div class="col-12 col-md-4 text-md-end">
+                    <button class="btn btn-primary w-100 w-md-auto d-flex align-items-center justify-content-center"
+                        id="toggle-btn">
+                        <i class="bi bi-eye-fill me-2"></i> View Completed Orders
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- In Progress Orders Section -->
+        <section id="in-progress-orders">
+            <h2 class="mb-3 text-primary">In Progress Orders</h2>
             {% if pending_orders %}
             <div class="row row-cols-1 row-cols-md-4 g-4">
-                {% for order in pending_orders %}
-                <div class="col">
-                    <div class="card h-100 shadow-lg dashboard-card">
-                        <div class="card-body">
-                            <h1>{{ order.customer }}</h1>
+                {% for order in pending_orders reversed %}
+                <div class="col order-card"  data-id="{{ order.id }}"
+                    data-name="{{ order.customer|default_if_none:'' }}"
+                    data-menu="{{ order.menu_item.name|default_if_none:'' }}">
+                    <div class="card h-100 shadow-lg dashboard-card" >
+                        <div class="card-body" data-url="{% url 'order_detail' order.id %}">
+                            <h5 class="text-primary">{{ order.customer }}</h5>
                             <p><strong>Order ID:</strong> {{ order.id }}</p>
                             <p><strong>Menu Item:</strong> {{ order.menu_item.name }}</p>
                             <p><strong>Toppings:</strong>
                                 {% for topping in order.toppings.all %}
                                 <span class="badge badge-success">{{ topping.name }}</span>
+                                {% empty %}
+                                None
                                 {% endfor %}
                             </p>
                             <p><strong>Toasted?</strong> {{ order.is_toasted|yesno }}</p>
-                            <p><strong>Created at</strong> {{ order.created_at }}</p>
+                            <p><strong>Created at:</strong> {{ order.created_at }}</p>
                         </div>
                         <div class="card-footer text-center">
                             <form action="{% url 'mark_order_completed' order.id %}" method="post" class="d-inline">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-primary">Mark as Completed</button>
+                                <button type="submit" class="btn btn-primary btn-sm">Mark as Completed</button>
                             </form>
 
-                            <!-- Delete Button with Bootstrap Modal -->
-                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ order.id }}">
+                            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
+                                data-bs-target="#deleteModal{{ order.id }}">
                                 Delete
                             </button>
+                        </div>
+                    </div>
+                </div>
 
-                            <!-- Delete Confirmation Modal -->
-                            <div class="modal fade" id="deleteModal{{ order.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ order.id }}" aria-hidden="true">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="deleteModalLabel{{ order.id }}">Confirm Deletion</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            Are you sure you want to delete this order for <strong>{{ order.menu_item.name }}</strong>?
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                            <form action="{% url 'delete_order' order.id %}" method="post" class="d-inline">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn btn-danger">Delete</button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
+                <div class="modal fade" id="deleteModal{{ order.id }}" tabindex="-1"
+                    aria-labelledby="deleteModalLabel{{ order.id }}" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title text-danger" id="deleteModalLabel{{ order.id }}">Confirm Delete
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
                             </div>
-                            <!-- End of Modal -->
+                            <div class="modal-body">
+                                Are you sure you want to delete <strong>Order #{{ order.id }}</strong> for <strong>{{
+                                    order.customer }}</strong>? This action cannot be undone.
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <form action="{% url 'kitchen_delete_order' order.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
                 {% endfor %}
             </div>
             {% else %}
-            <p class="text-muted">No pending orders found!</p>
+            <p class="text-muted">No in-progress orders found.</p>
             {% endif %}
         </section>
 
         <!-- Completed Orders Section -->
-        <section>
-            <h2 class="mb-3 text-success">Completed Orders</h2>
+        <section id="completed-orders">
+            <h2 class="mb-3 text-secondary">Completed Orders</h2>
             {% if completed_orders %}
-            <div class="row row-cols-1 row-cols-md-3 g-4">
-                {% for order in completed_orders %}
-                <div class="col">
+            <div class="row row-cols-1 row-cols-md-4 g-4">
+                {% for order in completed_orders reversed %}
+                <div class="col order-card" data-id="{{ order.id }}" data-name="{{ order.customer|default_if_none:'' }}"
+                    
+                    data-menu="{{ order.menu_item.name|default_if_none:'' }}">
                     <div class="card h-100 shadow-lg dashboard-card">
-                        <div class="card-body">
-                            <h1>{{ order.customer }}</h1>
+                        <div class="card-body" data-url="{% url 'order_detail' order.id %}">
+                            <h5>{{ order.customer }}</h5>
                             <p><strong>Order ID:</strong> {{ order.id }}</p>
                             <p><strong>Menu Item:</strong> {{ order.menu_item.name }}</p>
                             <p><strong>Toppings:</strong>
@@ -147,6 +204,14 @@
                             </p>
                             <p><strong>Toasted?</strong> {{ order.is_toasted|yesno }}</p>
                             <p><strong>Completed At:</strong> {{ order.completed_at }}</p>
+                        </div>
+                        <div class="card-footer text-center">
+                            <form action="{% url 'kitchen_delete_order' order.id %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    Deletedfbd
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -159,13 +224,60 @@
     </div>
 </section>
 
-<footer class="bg-dark text-white py-3 mt-5">
-    <div class="container text-center">
-        <p class="mb-0">&copy; 2024 Kitchen Orders App</p>
-    </div>
-</footer>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.getElementById("search-input");
+        const searchCategory = document.getElementById("search-category");
+        const toggleBtn = document.getElementById("toggle-btn");
+        const inProgressOrders = document.getElementById("in-progress-orders");
+        const completedOrders = document.getElementById("completed-orders");
 
-<!-- Bootstrap 5 JS (for modal functionality) -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        function searchOrders() {
+            const category = searchCategory.value;
+            const query = searchInput.value.toLowerCase();
+            const orders = Array.from(document.querySelectorAll(".order-card"));
+
+            orders.forEach(order => {
+                let value = order.getAttribute(`data-${category}`) || "";
+                order.style.display = value.toLowerCase().includes(query) ? "block" : "none";
+            });
+        }
+
+        searchInput.addEventListener("input", searchOrders);
+
+        // Restore toggle state from localStorage
+        let showCompletedOrders = localStorage.getItem("showCompletedOrders") === "true";
+
+        function updateOrderVisibility() {
+            if (showCompletedOrders) {
+                inProgressOrders.style.display = "none";
+                completedOrders.style.display = "block";
+                toggleBtn.textContent = "View In-Progress Orders";
+            } else {
+                inProgressOrders.style.display = "block";
+                completedOrders.style.display = "none";
+                toggleBtn.textContent = "View Completed Orders";
+            }
+        }
+
+        updateOrderVisibility();
+
+        toggleBtn.addEventListener("click", function () {
+            showCompletedOrders = !showCompletedOrders;
+            localStorage.setItem("showCompletedOrders", showCompletedOrders);
+            updateOrderVisibility();
+        });
+    });
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".card-body").forEach(function (card) {
+            card.addEventListener("click", function () {
+                let url = this.getAttribute("data-url");
+                if (url) {
+                    window.location.href = url;
+                }
+            });
+        });
+    });
+</script>
 
 {% endblock %}
