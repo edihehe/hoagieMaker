@@ -1,20 +1,20 @@
 {% extends "base.html" %}
-
 {% block content %}
-<section id="menu-detail" class="py-5 bg-light">
+
+<section id="menu-detail" class="py-5">
     <div class="container">
         <div class="row justify-content-center">
             <!-- Menu Image -->
-            <div class="col-md-6 mb-4">
-                <div class="card shadow-lg border-0">
+            <div class="col-md-6 mb-4" data-aos="fade-right">
+                <div class="card shadow-lg border-0 glass-card">
                     <img src="{{ menu.image.url }}" class="card-img-top img-fluid rounded" alt="{{ menu.name }}">
                 </div>
             </div>
 
             <!-- Menu Information -->
-            <div class="col-md-6">
-                <div class="card shadow-lg border-0 p-4 bg-white">
-                    <h2 class="mb-3 text-center text-primary">{{ menu.name }}</h2>
+            <div class="col-md-6" data-aos="fade-left">
+                <div class="card shadow-lg border-0 p-4 bg-glass">
+                    <h2 class="mb-3 text-center text-primary fw-bold">{{ menu.name }}</h2>
                     <p class="lead text-dark"><strong>Ingredients:</strong> {{ menu.ingredients }}</p>
 
                     <form method="POST">
@@ -33,7 +33,7 @@
                         <h4 class="mt-3 text-primary"><strong>Toppings:</strong></h4>
                         <div class="d-flex flex-wrap mb-3">
                             {% for topping in toppings %}
-                            <button type="button" class="btn topping-btn text-dark border border-primary" data-topping-id="{{ topping.id }}">
+                            <button type="button" class="btn topping-btn border border-primary" data-topping-id="{{ topping.id }}">
                                 {{ topping.name }}
                             </button>
                             {% endfor %}
@@ -45,11 +45,11 @@
 
                         <!-- Navigation and Submit Buttons -->
                         <div class="d-flex justify-content-between align-items-center">
-                            <a href="{% url 'landing_page' %}" class="btn btn-outline-primary btn-lg">
-                                <i class="bi bi-arrow-left-circle"></i> Back to Menu List
+                            <a href="{% url 'landing_page' %}" class="btn btn-outline-primary btn-lg hvr-icon-back">
+                                <i class="bi bi-arrow-left-circle hvr-icon"></i> Back to Menu List
                             </a>
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="bi bi-cart-plus"></i> Order Now
+                            <button type="submit" class="btn btn-primary btn-lg hvr-icon-forward">
+                                <i class="bi bi-cart-plus hvr-icon"></i> Order Now
                             </button>
                         </div>
                     </form>
@@ -59,37 +59,69 @@
     </div>
 </section>
 
+<!-- 🌟 Custom Styles -->
 <style>
-    /* Custom Styles */
+    /* Body Background */
     body {
-        background-color: #f8f9fa;
-        overflow-y: auto; /* Ensure the user can scroll */
+        background: linear-gradient(135deg, #e0e7ff, #f8f9fa);
+        overflow-y: auto; /* Ensure scrolling */
     }
 
+    /* Glassmorphism Effect */
+    .glass-card, .bg-glass {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Topping Buttons */
     .topping-btn {
         margin: 5px;
         font-size: 1rem;
-        padding: 8px 20px;
-        background-color: white;
+        padding: 10px 20px;
+        background-color: transparent;
         border: 2px solid #0d6efd;
-        cursor: pointer;
-        transition: all 0.3s ease;
         color: #0d6efd;
+        transition: all 0.3s ease;
+        border-radius: 8px;
     }
 
     .topping-btn:hover, .topping-btn.selected {
         background-color: #0d6efd;
         color: white;
+        transform: scale(1.05);
     }
 
+    /* Buttons */
+    .btn-lg {
+        font-size: 1.1rem;
+        padding: 12px 20px;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-lg:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Image Styling */
     .card-img-top {
         max-height: 400px;
         width: 100%;
         object-fit: cover;
+        border-radius: 15px;
     }
 </style>
 
+<!-- 🌟 AOS & Hover Effects -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hover.css/2.3.1/css/hover-min.css"></script>
 <script>
+    AOS.init(); // Initialize AOS animations
+
     document.addEventListener('DOMContentLoaded', function () {
         const toppingBtns = document.querySelectorAll('.topping-btn');
         const selectedToppingsInput = document.getElementById('selected-toppings');
@@ -112,4 +144,5 @@
         }
     });
 </script>
+
 {% endblock %}

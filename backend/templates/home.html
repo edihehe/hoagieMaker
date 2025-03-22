@@ -2,15 +2,19 @@
 {% load static %}
 {% block content %}
 
+<!-- 🌟 ICON AT THE TOP (ONLY FOR MOBILE USERS) -->
+<div class="text-center d-lg-none py-3" data-aos="fade-down">
+    <img src="{% static 'images/icons/cooker.webp' %}" alt="Logo" style="width: 80px; height: 80px;">
+</div>
+
 <!-- Orders in Progress Section -->
- 
-{% if user.is_authenticated and orders_in_progress %}
-<!-- <section id="orders-in-progress" class="py-4 bg-light">
+<!-- {% if user.is_authenticated and orders_in_progress %}
+<section id="orders-in-progress" class="py-4 bg-light" data-aos="fade-up">
     <div class="container">
         <h2 class="text-center text-primary mb-4">Orders in Progress</h2>
         <div class="row gy-3">
             {% for order in orders_in_progress %}
-            <div class="col-md-6 col-lg-4">
+            <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="100">
                 <div class="card shadow border-0">
                     <div class="card-body text-center">
                         <h5 class="card-title">{{ order.customer }}</h5>
@@ -55,18 +59,16 @@
             {% endfor %}
         </div>
     </div>
-</section> -->
-{% endif %}
-
-
+</section>
+{% endif %} -->
 
 <!-- Hoagie Options Section -->
-<section id="hoagie-options" class="py-5">
+<section id="hoagie-options" class="py-5" data-aos="fade-up">
     <div class="container">
         <h2 class="text-center mb-5">Our Hoagie Options</h2>
         <div class="row gy-4">
             {% for menu in menus %}
-            <div class="col-md-6 col-lg-3">
+            <div class="col-md-6 col-lg-3" data-aos="zoom-in" data-aos-delay="100">
                 <div class="card hoagie-card" data-url="{% url 'menu_detail' pk=menu.pk %}" style="cursor: pointer;">
                     <div class="card-img-container">
                         <img src="{{ menu.image.url }}" class="card-img-top" alt="{{ menu.name }}">
@@ -85,13 +87,16 @@
                 </div>
             </div>
             {% empty %}
-            <p class="text-center">No hoagies available at the moment. Please check back later!</p>
+            <p class="text-center" data-aos="fade-in">No hoagies available at the moment. Please check back later!</p>
             {% endfor %}
         </div>
     </div>
 </section>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
 <script>
+    AOS.init(); // Initialize AOS animations
+
     document.addEventListener("DOMContentLoaded", function () {
         document.querySelectorAll(".hoagie-card").forEach(function (card) {
             card.addEventListener("click", function () {

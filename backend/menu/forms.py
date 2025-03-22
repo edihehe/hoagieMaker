@@ -59,7 +59,7 @@ class MenuForm(forms.ModelForm):
 class ToppingForm(forms.ModelForm):
     class Meta:
         model = Topping
-        fields = ["name"]
+        fields = ['id',"name"]
         widgets = {
             "name": forms.TextInput(
                 attrs={

@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load widget_tweaks %}
 
 {% block content %}
 <div class="container my-5">
@@ -14,33 +15,40 @@
                         <div class="mb-4">
                             <div class="input-group mb-3">
                                 <span class="input-group-text">Menu Name</span>
-                                {{ form.name }}
+                                {{ form.name|add_class:"form-control" }}
                             </div>
                             <div class="mb-3">
-
-                                {{ form.image }}
+                                {{ form.image|add_class:"form-control" }}
                             </div>
                             <div class="form-floating mb-3">
-                                {{ form.ingredients }}
+                                {{ form.ingredients|add_class:"form-control" }}
                                 <label for="floatingTextarea2">Ingredients</label>
                             </div>
                             <div class="form-check form-switch">
-                                {{ form.is_toast }}
+                                {{ form.is_toast|add_class:"form-check-input" }}
                                 <label class="form-check-label" for="{{ form.is_toast.id_for_label }}">Toast
                                     Option</label>
                             </div>
                         </div>
 
                         <!-- Topping formset -->
-                        <div class="mb-2">
+                        <div class="mb-4">
                             <h4 class="fw-bold">Toppings</h4>
                             {{ formset.management_form }}
                             <div id="topping-forms">
-
                                 {% for form in formset %}
-                                <div class="topping-form border p-3 mb-3 rounded shadow-sm position-relative">
-                                    <div class="mb-3">
-                                        {{ form.as_p }}
+                                <div class="topping-form ">
+                                    <div
+                                        class=" border  mb-1 rounded shadow-sm position-relative bg-light d-flex align-items-center">
+                                        {{ form.id }}
+                                        <div class="flex-grow-1 me-2">
+                                            {{ form.name|add_class:"form-control" }}
+                                        </div>
+                                        <!-- <div class="mb-3 d-flex align-items-center"> -->
+                                        {{ form.DELETE|attr:"class:delete-checkbox d-none" }}
+                                        <button type="button" class="btn btn-danger btn-sm ms-2 deleteBtn">🗑
+                                            Delete</button>
+                                        <!-- </div> -->
                                     </div>
                                 </div>
                                 {% endfor %}
@@ -48,7 +56,7 @@
                         </div>
 
                         <!-- Button to dynamically add more toppings -->
-                        <button type="button" id="add-topping" class="btn btn-outline-secondary w-100 py-2 mt-3">Add
+                        <button type="button" id="add-topping" class="btn btn-outline-secondary w-100 py-2 mt-3">➕ Add
                             Topping</button>
 
                         <!-- Submit and Cancel buttons -->
@@ -62,88 +70,80 @@
         </div>
     </div>
 </div>
+
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const toppingFormsContainer = document.getElementById('topping-forms');
-        const totalForms = document.getElementById('id_form-TOTAL_FORMS');
+        const totalForms = document.querySelector('#id_form-TOTAL_FORMS');
+
         document.getElementById("add-topping").addEventListener("click", () => {
             const formIdx = parseInt(totalForms.value);
             const newFormHtml = `
-            <div class="topping-form border p-3 mb-3 rounded shadow-sm">
-                <div class="mb-3">
-                    <label for="id_form-${formIdx}-name">Topping Name:</label>
-                    <input type="text" name="form-${formIdx}-name" class="form-control">
+            <div class="topping-form">
+                <div class="border  mb-1 rounded shadow-sm position-relative bg-light d-flex align-items-center">
+                    <input type="hidden" name="form-${formIdx}-id" id="id_form-${formIdx}-id">
+                    <div class="flex-grow-1 me-2">
+                        <input type="text" name="form-${formIdx}-name" class="form-control" id="id_form-${formIdx}-name" placeholder="Topping Name">
+                    </div>
+                        <input type="checkbox" name="form-${formIdx}-DELETE" id="id_form-${formIdx}-DELETE" class="delete-checkbox d-none">
+                        <button type="button" class="btn btn-danger btn-sm deleteBtn">🗑 Delete</button>
                 </div>
-                <button type="button" class="btn btn-danger btn-sm remove-topping">Remove</button>
             </div>
         `;
+
             toppingFormsContainer.insertAdjacentHTML('beforeend', newFormHtml);
             totalForms.value = formIdx + 1;
         });
-        document.addEventListener("DOMContentLoaded", function () {
-            const deleteCheckboxes = document.querySelectorAll(".delete-checkbox");
 
-            deleteCheckboxes.forEach(function (checkbox) {
-                checkbox.addEventListener("change", function (e) {
-                    if (e.target.checked) {
-                        console.log("Checkbox checked for deletion:", e.target);
-                    } else {
-                        console.log("Checkbox unchecked.");
-                    }
-                });
-            });
-        });
-        toppingFormsContainer.addEventListener('click', async (e) => {
-            if (e.target.classList.contains('remove-topping')) {
-                const formToRemove = e.target.closest('.topping-form');
-                const toppingId = e.target.dataset.toppingId;
+        toppingFormsContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('deleteBtn')) {
+                const toppingForm = e.target.closest('.topping-form');
+                const deleteCheckbox = toppingForm.querySelector('.delete-checkbox');
 
-                console.log("Topping ID:", toppingId); // Log this value to debug
-
-                if (!toppingId) {
-                    alert("Invalid Topping ID. Cannot delete.");
-                    return;
-                }
-
-                try {
-                    const response = await fetch("/menu/delete-topping/", {
-                        method: "POST",
-                        headers: {
-                            "X-CSRFToken": '{{ csrf_token }}',
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({ topping_id: toppingId })
-                    });
-
-                    const result = await response.json();
-                    console.log("Server response:", result);
-
-                    if (result.status === 'success') {
-                        formToRemove.style.display = "none";
-                        totalForms.value = toppingFormsContainer.querySelectorAll('.topping-form:not([style*="display: none"])').length;
-                    } else {
-                        alert(result.message || "Failed to delete topping.");
-                    }
-                } catch (error) {
-                    console.error("Unexpected error:", error);
-                    alert("Error occurred while deleting.");
+                if (deleteCheckbox) {
+                    deleteCheckbox.checked = true;
+                    toppingForm.style.display = "none";
                 }
             }
         });
     });
-
 </script>
+
 <style>
     .form-check-input {
-        height: 1.2em;
-        width: 1.2em;
+        height: 1.5em;
+        width: 1.5em;
     }
 
     .form-check-label {
         cursor: pointer;
-        padding-left: 4px;
+        padding-left: 6px;
+        font-weight: 500;
+    }
+
+    .deleteBtn {
+        transition: all 0.2s ease-in-out;
+    }
+
+    .deleteBtn:hover {
+        background-color: #dc3545;
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .topping-form {
+        transition: all 0.3s ease-in-out;
+    }
+
+    .topping-form:hover {
+        background-color: #f8f9fa;
+        transform: scale(1.02);
+    }
+
+    .btn-primary,
+    .btn-outline-secondary {
+        font-size: 1.1rem;
     }
 </style>
-
 
 {% endblock %}

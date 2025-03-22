@@ -20,10 +20,10 @@
         <!-- Active Orders Section -->
         <div class="tab-pane fade show active" id="in-progress-orders">
             {% if active_orders %}
-            <div class="row gy-3">
+            <div class="row gy-4">
                 {% for order in active_orders %}
                 <div class="col-md-6 col-lg-4">
-                    <div class="card shadow border-0">
+                    <div class="card order-card shadow-sm border-0">
                         <div class="card-body text-center">
                             <p><strong>Order ID:</strong> {{ order.id }}</p>
                             <p><strong>Toppings:</strong>
@@ -37,49 +37,48 @@
                             <p><strong>Ordered on:</strong> {{ order.created_at }}</p>
 
                             <!-- Cancel Order Button -->
-                            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#cancelOrderModal{{ order.id }}">
-                                Cancel
+                            <button type="button" class="btn btn-danger btn-sm cancel-order-btn" data-bs-toggle="modal" data-bs-target="#cancelOrderModal{{ order.id }}">
+                                <i class="bi bi-x-circle"></i> Cancel
                             </button>
+                        </div>
+                    </div>
 
-                            <!-- Cancel Confirmation Modal -->
-                            <div class="modal fade" id="cancelOrderModal{{ order.id }}" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Cancel Order</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            Are you sure you want to cancel this order?
-                                        </div>
-                                        <div class="modal-footer">
-                                            <form action="{% url 'delete_order' order.id %}" method="post">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn btn-danger">Yes, Cancel</button>
-                                            </form>
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
-                                        </div>
-                                    </div>
+                    <!-- Cancel Confirmation Modal -->
+                    <div class="modal fade" id="cancelOrderModal{{ order.id }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Cancel Order</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body text-center">
+                                    <p>Are you sure you want to cancel this order?</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <form action="{% url 'delete_order' order.id %}" method="post">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger">Yes, Cancel</button>
+                                    </form>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 </div>
                 {% endfor %}
             </div>
             {% else %}
-            <p class="text-center">No active orders.</p>
+            <p class="text-center text-muted">No active orders.</p>
             {% endif %}
         </div>
 
         <!-- Completed Orders Section -->
         <div class="tab-pane fade" id="completed-orders">
             {% if completed_orders %}
-            <div class="row gy-3">
+            <div class="row gy-4">
                 {% for order in completed_orders %}
                 <div class="col-md-6 col-lg-4">
-                    <div class="card shadow border-0 bg-dark text-light">
+                    <div class="card order-card completed-card shadow-sm border-0">
                         <div class="card-body text-center">
                             <p><strong>Order ID:</strong> {{ order.id }}</p>
                             <p><strong>Toppings:</strong>
@@ -92,45 +91,89 @@
                             <p><strong>Toasted?</strong> {{ order.is_toasted|yesno }}</p>
                             <p><strong>Ordered on:</strong> {{ order.created_at }}</p>
                             <p><strong>Completed on:</strong> {{ order.completed_at }}</p>
-                            <p class="text-warning fw-bold">Completed ✅</p>
+                            <p class="text-success fw-bold"><i class="bi bi-check-circle"></i> Completed</p>
                         </div>
                     </div>
                 </div>
                 {% endfor %}
             </div>
             {% else %}
-            <p class="text-center">No completed orders.</p>
+            <p class="text-center text-muted">No completed orders.</p>
             {% endif %}
         </div>
     </div>
 </section>
+
+<!-- 🌟 Custom Styles -->
+<style>
+    /* Order Cards */
+    .order-card {
+        background: white;
+        border-radius: 12px;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .order-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Completed Order Card */
+    .completed-card {
+        background: #343a40;
+        color: white;
+    }
+
+    /* Buttons */
+    .btn-danger, .btn-secondary {
+        font-size: 0.9rem;
+        padding: 8px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-danger:hover, .btn-secondary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Tabs */
+    .nav-pills .nav-link {
+        border-radius: 8px;
+        padding: 10px 15px;
+        transition: all 0.3s ease;
+    }
+
+    .nav-pills .nav-link.active {
+        background: #007bff;
+        color: white;
+    }
+
+    .nav-pills .nav-link:hover {
+        background: rgba(0, 123, 255, 0.1);
+    }
+</style>
+
+<!-- 🌟 JavaScript for Smooth Tab Switching -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        document.querySelectorAll(".delete-order-btn").forEach(button => {
+        // Highlight the active tab
+        const tabs = document.querySelectorAll(".nav-pills .nav-link");
+        tabs.forEach(tab => {
+            tab.addEventListener("click", function () {
+                tabs.forEach(t => t.classList.remove("active"));
+                this.classList.add("active");
+            });
+        });
+
+        // Cancel Order Interaction
+        document.querySelectorAll(".cancel-order-btn").forEach(button => {
             button.addEventListener("click", function () {
                 const orderId = this.dataset.orderId;
-                const confirmation = confirm("Are you sure you want to cancel this order?");
-                if (!confirmation) return;
-    
-                fetch(`/delete_order/${orderId}/`, {
-                    method: "POST",
-                    headers: {
-                        "X-CSRFToken": "{{ csrf_token }}",
-                        "X-Requested-With": "XMLHttpRequest"
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.message) {
-                        alert("Order canceled successfully!");
-                        document.getElementById(`order-${orderId}`).remove(); // Remove order from page
-                    } else {
-                        alert("Error: " + data.error);
-                    }
-                })
-                .catch(error => console.error("Error:", error));
+                document.getElementById(`cancelOrderModal${orderId}`).classList.add("show");
             });
         });
     });
-    </script>
+</script>
+
 {% endblock %}
