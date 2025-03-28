@@ -120,10 +120,9 @@
             {% if pending_orders %}
             <div class="row row-cols-1 row-cols-md-4 g-4">
                 {% for order in pending_orders reversed %}
-                <div class="col order-card"  data-id="{{ order.id }}"
-                    data-name="{{ order.customer|default_if_none:'' }}"
+                <div class="col order-card" data-id="{{ order.id }}" data-name="{{ order.customer|default_if_none:'' }}"
                     data-menu="{{ order.menu_item.name|default_if_none:'' }}">
-                    <div class="card h-100 shadow-lg dashboard-card" >
+                    <div class="card h-100 shadow-lg dashboard-card">
                         <div class="card-body" data-url="{% url 'order_detail' order.id %}">
                             <h5 class="text-primary">{{ order.customer }}</h5>
                             <p><strong>Order ID:</strong> {{ order.id }}</p>
@@ -190,7 +189,6 @@
             <div class="row row-cols-1 row-cols-md-4 g-4">
                 {% for order in completed_orders reversed %}
                 <div class="col order-card" data-id="{{ order.id }}" data-name="{{ order.customer|default_if_none:'' }}"
-                    
                     data-menu="{{ order.menu_item.name|default_if_none:'' }}">
                     <div class="card h-100 shadow-lg dashboard-card">
                         <div class="card-body" data-url="{% url 'order_detail' order.id %}">
@@ -278,6 +276,17 @@
             });
         });
     });
+    var socket = new WebSocket("ws://" + window.location.host + "/ws/orders/");
+
+    socket.onmessage = function (event) {
+        var data = JSON.parse(event.data);
+        console.log("New Order:", data.message);
+        location.reload();  // Refresh the page when a new order is received
+    };
+
+    socket.onclose = function (event) {
+        console.error("WebSocket closed unexpectedly");
+    };
 </script>
 
 {% endblock %}

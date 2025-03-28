@@ -37,8 +37,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
-    "menu",
-    "order",
+    'daphne',
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -52,6 +51,9 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.google",
     "allauth.socialaccount.providers.github",
     'widget_tweaks',
+    'channels',
+    "menu",
+    "order",
 ]
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
 SOCIALACCOUNT_PROVIDERS = {
@@ -76,7 +78,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "app.urls"
-
+ASGI_APPLICATION = 'app.asgi.application'
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -92,6 +94,12 @@ TEMPLATES = [
         },
     },
 ]
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
 
 WSGI_APPLICATION = "app.wsgi.application"
 

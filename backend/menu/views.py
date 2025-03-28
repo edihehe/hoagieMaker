@@ -8,6 +8,8 @@ from django.shortcuts import render, redirect
 from order.models import Order
 import json
 from django.contrib.auth.decorators import login_required   
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 # List View
 def menu_list(request):
@@ -67,6 +69,17 @@ def menu_detail(request, pk):
                 )
 
         order.save()
+
+        # Send WebSocket message for real-time updates
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            "orders",  # Group name
+            {
+                "type": "order_update",
+                "message": f"New Order: {order.id} - {menu.name}",
+            }
+        )
+
         return redirect("order_success", order_id=order.id)
 
     return render(
@@ -77,8 +90,6 @@ def menu_detail(request, pk):
             "toppings": toppings,  # Pass filtered toppings to the template
         },
     )
-# Delete View
-
 
 def menu_delete(request, pk):
     menu = get_object_or_404(Menu, pk=pk)

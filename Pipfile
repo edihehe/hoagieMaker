@@ -12,9 +12,9 @@ requests = "*"
 pyjwt = "*"
 cryptography = "*"
 django-widget-tweaks = "*"
-daphne = "*"
 channels = "*"
 channels-redis = "*"
+daphne = "*"
 
 [dev-packages]
 
