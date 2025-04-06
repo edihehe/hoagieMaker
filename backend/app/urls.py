@@ -35,5 +35,6 @@ urlpatterns = [
     path("logout-confirmed/", LogoutView.as_view(next_page="home"), name="logout"),
     path("menu/", include("menu.urls")),
     path("kitchen/", include("order.urls")),
+    path('lunch/', include('lunch.urls')),
     # path("delete_order/<int:order_id>/", delete_order, name="cancel_order"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

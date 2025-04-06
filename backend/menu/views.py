@@ -10,7 +10,8 @@ import json
 from django.contrib.auth.decorators import login_required   
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
-
+from lunch.utils import *
+from django.contrib import messages
 # List View
 def menu_list(request):
     menus = Menu.objects.all()
@@ -20,7 +21,7 @@ def menu_list(request):
 def menu_create(request):
     ToppingFormSet = modelformset_factory(Topping, form=ToppingForm, extra=1)
 
-    if request.method == "POST":
+    if request.method == "POST" :
         form = MenuForm(request.POST, request.FILES)
         formset = ToppingFormSet(request.POST)
         if form.is_valid() and formset.is_valid():
@@ -47,6 +48,12 @@ def menu_detail(request, pk):
     menu = get_object_or_404(Menu, pk=pk)  # Fetch the specific menu item
     toppings = menu.toppings.all()  # Fetch toppings associated with the specific menu
     is_toasted = "toastOption" in request.POST  # Check if the toasted option is selected
+    if not is_lunch_period_valid(request.user, get_current_period()):
+        messages.error(request, "Its not your lunch right now.")
+        # messages.error(request, "Yoo bchass get the fuck outta here, its not your fucking lunch time damnasss🖕🖕🖕 ")
+        
+        return redirect("landing_page")
+
 
     if request.method == "POST":
         toppings_selected = request.POST.get("toppings", "")  # Selected toppings as a string

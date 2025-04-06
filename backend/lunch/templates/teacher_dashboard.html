@@ -1,0 +1,727 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="dashboard-container">
+    <header class="dashboard-header">
+        <h1 class="dashboard-title">Lunch Period Management</h1>
+        <div class="header-actions">
+            <div class="search-container">
+                <svg class="search-icon" viewBox="0 0 24 24">
+                    <path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 0 0 1.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 0 0-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 0 0 5.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                </svg>
+                <input type="text" id="search-bar" placeholder="Search students..." aria-label="Search students">
+            </div>
+            <div class="current-period-indicator">
+                <span class="period-label">Current Lunch Period:</span>
+                <span class="period-value">{{ current_period }}</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="dashboard-content">
+        <nav class="dashboard-tabs">
+            <button class="tab-btn active" data-tab="current-lunch" aria-selected="true">
+                <svg class="tab-icon" viewBox="0 0 24 24">
+                    <path d="M11 9h2V6h3V4h-3V1h-2v3H8v2h3v3zm-4 9c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zm-9.83-3.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.86-7.01L19.42 4h-.01l-1.1 2-2.76 5H8.53l-.13-.27L6.16 6l-.95-2-.94-2H1v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.13 0-.25-.11-.25-.25z"/>
+                </svg>
+                Currently
+                {% if students_with_lunch %}
+                <span class="badge">{{ students_with_lunch|length }}</span>
+                {% endif %}
+            </button>
+            <button class="tab-btn" data-tab="temp-permission" aria-selected="false">
+                <svg class="tab-icon" viewBox="0 0 24 24">
+                    <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11V11.99z"/>
+                </svg>
+                Passes
+                {% if students_with_temp_permission %}
+                <span class="badge">{{ students_with_temp_permission|length }}</span>
+                {% endif %}
+            </button>
+            <button class="tab-btn" data-tab="all-students" aria-selected="false">
+                <svg class="tab-icon" viewBox="0 0 24 24">
+                    <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                </svg>
+                All 
+                <span class="badge">{{ students|length }}</span>
+            </button>
+        </nav>
+
+        <!-- Currently at Lunch Tab -->
+        <div id="current-lunch" class="tab-content active" role="tabpanel" aria-labelledby="current-lunch-tab">
+            {% if students_with_lunch %}
+            <div class="responsive-grid">
+                {% for student in students_with_lunch %}
+                <div class="student-card">
+                    <div class="student-avatar">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                    </div>
+                    <div class="student-info">
+                        <h3 class="student-name">{{ student.user.get_full_name|default:student.user.username }}</h3>
+                        <p class="student-detail">
+                            <span class="detail-label">Lunch:</span>
+                            <span class="detail-value">{{ student.get_lunch_period_display }}</span>
+                        </p>
+                    </div>
+                    <div class="student-actions">
+                        <form method="POST" action="{% url 'update_lunch_period' student.id %}" class="inline-form">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <select name="lunch_period" class="form-select" aria-label="Select lunch period">
+                                    <option value="4" {% if student.lunch_period == 4 %}selected{% endif %}>4th Period</option>
+                                    <option value="5" {% if student.lunch_period == 5 %}selected{% endif %}>5th Period</option>
+                                    <option value="6" {% if student.lunch_period == 6 %}selected{% endif %}>6th Period</option>
+                                    <option value="7" {% if student.lunch_period == 7 %}selected{% endif %}>7th Period</option>
+                                </select>
+                                <button type="submit" class="btn btn-primary" aria-label="Update lunch period">
+                                    <svg viewBox="0 0 24 24" width="18" height="18">
+                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                                    </svg>
+                                    Update
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24" class="empty-icon">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.31-8.86c-1.77-.45-2.34-.94-2.34-1.67 0-.84.79-1.43 2.1-1.43 1.38 0 1.9.66 1.94 1.64h1.71c-.05-1.34-.87-2.57-2.49-2.97V5H10.9v1.69c-1.51.32-2.72 1.3-2.72 2.81 0 1.79 1.49 2.69 3.66 3.21 1.95.46 2.34 1.15 2.34 1.87 0 .53-.39 1.39-2.1 1.39-1.6 0-2.23-.72-2.32-1.64H8.04c.1 1.7 1.36 2.66 2.86 2.97V19h2.34v-1.67c1.52-.29 2.72-1.16 2.73-2.77-.01-2.2-1.9-2.96-3.66-3.42z"/>
+                </svg>
+                <h3>No students currently at lunch</h3>
+                <p>There are no students scheduled for lunch during period {{ current_period }}.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Temporary Permission Tab -->
+        <div id="temp-permission" class="tab-content" role="tabpanel" aria-labelledby="temp-permission-tab">
+            {% if students_with_temp_permission %}
+            <div class="responsive-grid">
+                {% for student in students_with_temp_permission %}
+                <div class="student-card">
+                    <div class="student-avatar">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                    </div>
+                    <!-- REPLACE THIS SECTION -->
+                    <div class="student-info">
+                        <h3 class="student-name">{{ student.user.get_full_name|default:student.user.username }}</h3>
+                        <p class="student-detail">
+                            <span class="detail-label">Lunch:</span>
+                            <span class="detail-value">{{ student.get_lunch_period_display }}</span>
+                        </p>
+                        <p class="student-detail">
+                            <span class="detail-label">Permission Date:</span>
+                            <span class="detail-value">{{ student.temporary_permission|date:"Y-m-d" }}</span>
+                        </p>
+                    </div>
+                    <!-- END OF REPLACEMENT -->
+                    <div class="student-actions">
+                        <form method="POST" action="{% url 'revoke_temporary_permission' student.id %}" class="inline-form">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger" aria-label="Revoke temporary access">
+                                <svg viewBox="0 0 24 24" width="18" height="18">
+                                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                                </svg>
+                                Revoke Pass
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24" class="empty-icon">
+                    <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                </svg>
+                <h3>No temporary passes granted</h3>
+                <p>There are currently no students with temporary lunch access.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- All Students Tab -->
+        <div id="all-students" class="tab-content" role="tabpanel" aria-labelledby="all-students-tab">
+            <div class="responsive-grid">
+                {% for student in students %}
+                <div class="student-card">
+                    <div class="student-avatar">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                    </div>
+                    <div class="student-info">
+                        <h3 class="student-name">{{ student.user.get_full_name|default:student.user.username }}</h3>
+                        <p class="student-detail">
+                            <span class="detail-label">Lunch:</span>
+                            <span class="detail-value">{{ student.get_lunch_period_display }}</span>
+                        </p>
+                    </div>
+                    <div class="student-actions">
+                        <form method="POST" action="{% url 'update_lunch_period' student.id %}" class="inline-form">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <select name="lunch_period" class="form-select" aria-label="Select lunch period">
+                                    <option value="4" {% if student.lunch_period == 4 %}selected{% endif %}>4th Period</option>
+                                    <option value="5" {% if student.lunch_period == 5 %}selected{% endif %}>5th Period</option>
+                                    <option value="6" {% if student.lunch_period == 6 %}selected{% endif %}>6th Period</option>
+                                    <option value="7" {% if student.lunch_period == 7 %}selected{% endif %}>7th Period</option>
+                                </select>
+                                <button type="submit" class="btn btn-primary" aria-label="Update lunch period">
+                                    <svg viewBox="0 0 24 24" width="18" height="18">
+                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                                    </svg>
+                                    Update
+                                </button>
+                            </div>
+                        </form>
+                        <form method="POST" action="{% url 'grant_temporary_permission' student.id %}" class="inline-form">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-warning" aria-label="Grant temporary access">
+                                <svg viewBox="0 0 24 24" width="18" height="18">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.31-8.86c-1.77-.45-2.34-.94-2.34-1.67 0-.84.79-1.43 2.1-1.43 1.38 0 1.9.66 1.94 1.64h1.71c-.05-1.34-.87-2.57-2.49-2.97V5H10.9v1.69c-1.51.32-2.72 1.3-2.72 2.81 0 1.79 1.49 2.69 3.66 3.21 1.95.46 2.34 1.15 2.34 1.87 0 .53-.39 1.39-2.1 1.39-1.6 0-2.23-.72-2.32-1.64H8.04c.1 1.7 1.36 2.66 2.86 2.97V19h2.34v-1.67c1.52-.29 2.72-1.16 2.73-2.77-.01-2.2-1.9-2.96-3.66-3.42z"/>
+                                </svg>
+                                Lunch Pass
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        /* BHSS Color Palette */
+        --bhs-primary: #0056b3;       /* Primary blue */
+        --bhs-secondary: #e6f0fa;     /* Light blue background */
+        --bhs-accent: #ff6b00;        /* Orange accent */
+        --bhs-success: #28a745;       /* Green for success */
+        --bhs-warning: #ffc107;       /* Yellow for warning */
+        --bhs-danger: #dc3545;        /* Red for danger */
+        --bhs-light: #f8f9fa;         /* Light gray */
+        --bhs-dark: #343a40;         /* Dark gray */
+        --bhs-text: #212529;         /* Main text color */
+        --bhs-border: #dee2e6;       /* Border color */
+        
+        /* Spacing */
+        --space-xs: 0.25rem;
+        --space-sm: 0.5rem;
+        --space-md: 1rem;
+        --space-lg: 1.5rem;
+        --space-xl: 2rem;
+        
+        /* Border radius */
+        --radius-sm: 4px;
+        --radius-md: 8px;
+        --radius-lg: 12px;
+        
+        /* Shadows */
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Base styles */
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        line-height: 1.6;
+        color: var(--bhs-text);
+        background-color: var(--bhs-light);
+    }
+
+    /* Dashboard container */
+    .dashboard-container {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: var(--space-md);
+    }
+
+    /* Dashboard header */
+    .dashboard-header {
+        margin-bottom: var(--space-lg);
+        padding-bottom: var(--space-md);
+        border-bottom: 1px solid var(--bhs-border);
+    }
+
+    .dashboard-title {
+        color: var(--bhs-primary);
+        font-size: 1.75rem;
+        font-weight: 600;
+        margin-bottom: var(--space-md);
+        text-align: center;
+    }
+
+    .header-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-md);
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* Search container */
+    .search-container {
+        position: relative;
+        flex-grow: 1;
+        max-width: 400px;
+        min-width: 250px;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: var(--space-md);
+        top: 50%;
+        transform: translateY(-50%);
+        width: 20px;
+        height: 20px;
+        fill: var(--bhs-dark);
+        opacity: 0.7;
+    }
+
+    #search-bar {
+        width: 100%;
+        padding: var(--space-sm) var(--space-sm) var(--space-sm) calc(var(--space-md) + 20px + var(--space-sm));
+        border: 1px solid var(--bhs-border);
+        border-radius: var(--radius-md);
+        font-size: 1rem;
+        transition: all 0.2s;
+        background-color: white;
+    }
+
+    #search-bar:focus {
+        outline: none;
+        border-color: var(--bhs-primary);
+        box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.1);
+    }
+
+    /* Current period indicator */
+    .current-period-indicator {
+        display: flex;
+        align-items: center;
+        gap: var(--space-sm);
+        background-color: var(--bhs-secondary);
+        padding: var(--space-sm) var(--space-md);
+        border-radius: var(--radius-md);
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+
+    .period-label {
+        color: var(--bhs-dark);
+        opacity: 0.8;
+    }
+
+    .period-value {
+        font-weight: 600;
+        color: var(--bhs-primary);
+    }
+
+    /* Tabs navigation */
+    .dashboard-tabs {
+        display: flex;
+        border-bottom: 1px solid var(--bhs-border);
+        margin-bottom: var(--space-lg);
+    }
+
+    .tab-btn {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: var(--space-sm);
+        padding: var(--space-md) var(--space-lg);
+        background: none;
+        border: none;
+        border-bottom: 3px solid transparent;
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: var(--bhs-dark);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+        color: var(--bhs-primary);
+        background-color: rgba(0, 86, 179, 0.05);
+    }
+
+    .tab-btn.active {
+        color: var(--bhs-primary);
+        border-bottom-color: var(--bhs-primary);
+    }
+
+    .tab-btn .tab-icon {
+        width: 18px;
+        height: 18px;
+        fill: currentColor;
+    }
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 20px;
+        height: 20px;
+        padding: 0 var(--space-xs);
+        background-color: var(--bhs-primary);
+        color: white;
+        border-radius: 10px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .tab-btn.active .badge {
+        background-color: var(--bhs-primary);
+    }
+
+    /* Tab content */
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    /* Responsive grid */
+    .responsive-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: var(--space-md);
+    }
+
+    /* Student card */
+    .student-card {
+        display: flex;
+        background-color: white;
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-sm);
+        padding: var(--space-md);
+        transition: transform 0.2s, box-shadow 0.2s;
+        min-height: 120px;
+    }
+
+    .student-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .student-avatar {
+        flex-shrink: 0;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background-color: var(--bhs-secondary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: var(--space-md);
+    }
+
+    .student-avatar svg {
+        width: 24px;
+        height: 24px;
+        fill: var(--bhs-primary);
+    }
+
+    .student-info {
+        flex-grow: 1;
+        min-width: 0; /* Prevent flex item from overflowing */
+        overflow: hidden; /* Ensure text doesn't overflow */
+    }
+
+    .student-name {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: var(--space-xs);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+        display: block;
+    }
+
+    .student-detail {
+        display: flex;
+        font-size: 0.875rem;
+        color: var(--bhs-dark);
+        margin-bottom: var(--space-sm);
+        flex-wrap: wrap;
+    }
+
+    .detail-label {
+        font-weight: 500;
+        margin-right: var(--space-xs);
+        opacity: 0.8;
+    }
+
+    .detail-value {
+        font-weight: 600;
+    }
+
+    .student-actions {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-sm);
+        min-width: 150px; /* Ensure buttons have enough space */
+        margin-left: var(--space-sm);
+    }
+
+    .inline-form {
+        display: flex;
+        width: 100%;
+    }
+
+    .form-group {
+        display: flex;
+        gap: var(--space-sm);
+        width: 100%;
+    }
+
+    .form-select {
+        padding: var(--space-sm);
+        border: 1px solid var(--bhs-border);
+        border-radius: var(--radius-sm);
+        font-size: 0.875rem;
+        background-color: white;
+        min-width: 100px;
+        flex-grow: 1;
+        max-width: 120px;
+    }
+
+    .form-select:focus {
+        outline: none;
+        border-color: var(--bhs-primary);
+        box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.1);
+    }
+
+    /* Buttons */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-xs);
+        padding: var(--space-sm) var(--space-md);
+        border: none;
+        border-radius: var(--radius-sm);
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+        min-width: fit-content;
+    }
+
+    .btn-primary {
+        background-color: var(--bhs-primary);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: #004494;
+    }
+
+    .btn-warning {
+        background-color: var(--bhs-warning);
+        color: var(--bhs-dark);
+    }
+
+    .btn-warning:hover {
+        background-color: #e0a800;
+    }
+
+    .btn svg {
+        width: 16px;
+        height: 16px;
+        fill: currentColor;
+    }
+
+    /* Empty state */
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: var(--space-xl) var(--space-md);
+        background-color: white;
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-sm);
+        grid-column: 1 / -1;
+    }
+
+    .empty-icon {
+        width: 64px;
+        height: 64px;
+        fill: var(--bhs-dark);
+        opacity: 0.3;
+        margin-bottom: var(--space-md);
+    }
+
+    .empty-state h3 {
+        color: var(--bhs-dark);
+        margin-bottom: var(--space-sm);
+    }
+
+    .empty-state p {
+        color: var(--bhs-dark);
+        opacity: 0.7;
+        max-width: 400px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1024px) {
+        .student-card {
+            flex-direction: column;
+        }
+        
+        .student-avatar {
+            margin-right: 0;
+            margin-bottom: var(--space-md);
+        }
+        
+        .student-actions {
+            margin-left: 0;
+            margin-top: var(--space-md);
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+        
+        .form-group {
+            width: 100%;
+        }
+        
+        .form-select {
+            max-width: none;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .header-actions {
+            flex-direction: column;
+            align-items: stretch;
+            gap: var(--space-md);
+        }
+
+        .search-container {
+            max-width: 100%;
+        }
+
+        .dashboard-tabs {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .tab-btn {
+            padding: var(--space-md) var(--space-md);
+            white-space: nowrap;
+        }
+
+        .responsive-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .current-period-indicator {
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .dashboard-title {
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            flex-direction: column;
+        }
+
+        .form-select {
+            width: 100%;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tab switching functionality
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        tabButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const tabId = this.getAttribute('data-tab');
+                
+                // Update tab buttons
+                tabButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.setAttribute('aria-selected', 'false');
+                });
+                this.classList.add('active');
+                this.setAttribute('aria-selected', 'true');
+                
+                // Update tab content
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // Search functionality with debounce
+        const searchInput = document.getElementById('search-bar');
+        let searchTimeout;
+        
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(filterStudents, 300);
+        });
+
+        function filterStudents() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const studentCards = document.querySelectorAll('.student-card');
+            
+            studentCards.forEach(card => {
+                const name = card.querySelector('.student-name').textContent.toLowerCase();
+                const lunchPeriod = card.querySelector('.detail-value')?.textContent.toLowerCase() || '';
+                
+                if (name.includes(searchTerm) || lunchPeriod.includes(searchTerm)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Add keyboard navigation to tabs
+        tabButtons.forEach((button, index) => {
+            button.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    const direction = e.key === 'ArrowRight' ? 1 : -1;
+                    const nextIndex = (index + direction + tabButtons.length) % tabButtons.length;
+                    tabButtons[nextIndex].focus();
+                } else if (e.key === 'Home') {
+                    e.preventDefault();
+                    tabButtons[0].focus();
+                } else if (e.key === 'End') {
+                    e.preventDefault();
+                    tabButtons[tabButtons.length - 1].focus();
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

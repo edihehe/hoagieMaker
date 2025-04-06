@@ -3,6 +3,7 @@ from .models import Order
 from menu.models import Menu, Topping
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
+from lunch.utils import *
 
 def order_menu(request, menu_id):
     if not request.user.is_authenticated:
@@ -11,7 +12,8 @@ def order_menu(request, menu_id):
     menu = Menu.objects.get(id=menu_id)
     toppings = Topping.objects.filter(menu=menu)
     
-    if request.method == "POST":
+    if request.method == "POST" and  is_lunch_period_valid(request.user, get_current_period()):
+        print(is_lunch_period_valid(request.user, get_current_period()))
         selected_toppings = request.POST.getlist("toppings")
         is_toasted = "is_toasted" in request.POST
         order = Order.objects.create(
@@ -19,6 +21,7 @@ def order_menu(request, menu_id):
         )
         order.toppings.set(selected_toppings)
         order.save()
+        print('hergeroerkgergergergoekrver')
         return redirect("order_success", order_id=order.id)
 
     return render(request, "order_menu.html", {"menu": menu, "toppings": toppings})

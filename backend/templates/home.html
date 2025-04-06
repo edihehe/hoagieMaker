@@ -7,62 +7,13 @@
     <img src="{% static 'images/icons/cooker.webp' %}" alt="Logo" style="width: 80px; height: 80px;">
 </div>
 
-<!-- Orders in Progress Section -->
-<!-- {% if user.is_authenticated and orders_in_progress %}
-<section id="orders-in-progress" class="py-4 bg-light" data-aos="fade-up">
-    <div class="container">
-        <h2 class="text-center text-primary mb-4">Orders in Progress</h2>
-        <div class="row gy-3">
-            {% for order in orders_in_progress %}
-            <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="100">
-                <div class="card shadow border-0">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">{{ order.customer }}</h5>
-                        <p><strong>Toppings:</strong>
-                            {% for topping in order.toppings.all %}
-                            <span class="badge bg-success">{{ topping.name }}</span>
-                            {% empty %}
-                            No toppings selected
-                            {% endfor %}
-                        </p>
-                        <p><strong>Toasted?</strong> {{ order.is_toasted|yesno }}</p>
-                        <p><strong>Ordered on:</strong> {{ order.created_at }}</p>
-                        
-                        <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#cancelOrderModal{{ order.id }}">
-                            Cancel
-                        </button>
-
-                        <div class="modal fade" id="cancelOrderModal{{ order.id }}" tabindex="-1" aria-labelledby="cancelOrderLabel{{ order.id }}" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="cancelOrderLabel{{ order.id }}">Cancel Order</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        Are you sure you want to cancel this order?
-                                    </div>
-                                    <div class="modal-footer">
-                                        <form action="{% url 'delete_order' order.id %}" method="post">
-                                            {% csrf_token %}
-                                            <button type="submit" class="btn btn-danger">Yes, Cancel</button>
-                                        </form>
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
+<!-- {% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-warning mt-3" role="alert">
+      {{ message }}
     </div>
-</section>
+{% endfor %}
 {% endif %} -->
-
-<!-- Hoagie Options Section -->
 <section id="hoagie-options" class="py-5" data-aos="fade-up">
     <div class="container">
         <h2 class="text-center mb-5">Our Hoagie Options</h2>
@@ -104,6 +55,46 @@
             });
         });
     });
+    document.body.addEventListener('htmx:beforeSwap', function (evt) {
+        if (evt.detail.xhr.status === 422) {
+            evt.detail.shouldSwap = true;
+            evt.detail.isError = false;
+        }
+    });
+    fetch(`/menu/${pk}/`, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => { throw err; });
+            }
+            return response.json();
+        })
+        .catch(error => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: error.message,
+                footer: '<a href="/help">Why do I have this issue?</a>'
+            });
+        });
+   
 </script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- {% if messages %}
+{% for message in messages %}
+<script>
+    Swal.fire({
+        title: "{{ message.tags|title }}",
+        text: "{{ message }}",
+        icon: "{{ message.tags }}" === "error" ? "error" : "success",
+        confirmButtonColor: '#3085d6',
+    });
+</script>
+{% endfor %}
+{% endif %}
+<script src="https://unpkg.com/htmx.org@1.9.6"></script>
+<script src="https://unpkg.com/hyperscript.org@0.9.11"></script> -->
 
 {% endblock %}

@@ -245,6 +245,11 @@
           </li>
           <li class="nav-item"><a class="nav-link" href="{% url 'orders' %}"><i class="bi bi-cart"></i>My Orders</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'teacher_dashboard' %}">
+              <i class="bi bi-clipboard-check"></i> Manage Lunch
+            </a>
+          </li>
           <li class="nav-item"><a class="nav-link" href="{% url 'view_orders' %}"><i class="bi bi-basket"></i>
               Kitchen</a></li>
 
@@ -296,5 +301,21 @@
     AOS.init(); // Initialize animations
   </script>
 </body>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+{% if messages %}
+{% for message in messages %}
+<script>
+    Swal.fire({
+        title: "{{ message.tags|title }}",
+        text: "{{ message }}",
+        icon: "{{ message.tags }}" === "error" ? "error" : "success",
+        confirmButtonColor: '#3085d6',
+    });
+</script>
+{% endfor %}
+{% endif %}
+<script src="https://unpkg.com/htmx.org@1.9.6"></script>
+<script src="https://unpkg.com/hyperscript.org@0.9.11"></script>
 
 </html>
