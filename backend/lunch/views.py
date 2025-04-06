@@ -14,32 +14,34 @@ def teacher_dashboard(request):
     students = StudentProfile.objects.all()
     current_period = get_current_period()
     today = date.today()
+    
     # Filter students who currently have lunch
     students_with_lunch = [s for s in students if is_lunch_period_valid(s.user, current_period)]
     students_with_temp_permission = [s for s in students if s.temporary_permission == today]
+    grab_and_go_students = [s for s in students if s.lunch_period == 0]
+    
     return render(request, 'teacher_dashboard.html', {
         'students': students,
         'students_with_lunch': students_with_lunch,
         'students_with_temp_permission': students_with_temp_permission,
+        'grab_and_go_students': grab_and_go_students,
         'current_period': current_period,
-    })  
+    })
 
 # @user_passes_test(is_teacher)
 def update_lunch_period(request, student_id):
-    """Allows teachers to update a student's lunch period."""
     student = get_object_or_404(StudentProfile, id=student_id)
-
     if request.method == 'POST':
-        new_period = int(request.POST.get('lunch_period'))
-        if new_period in [4, 5, 6, 7]:
-            student.lunch_period = new_period
+        lunch_period = request.POST.get('lunch_period')
+        # Validate the lunch period is in the allowed choices
+        valid_periods = [str(choice[0]) for choice in StudentProfile.LUNCH_PERIODS]
+        if lunch_period in valid_periods:
+            student.lunch_period = int(lunch_period)
             student.save()
-            messages.success(request, f"{student.user.username}'s lunch period updated to {new_period}.")
+            messages.success(request, 'Lunch period updated successfully!')
         else:
-            messages.error(request, "Invalid lunch period selected.")
-
+            messages.error(request, 'Invalid lunch period selected.')
     return redirect('teacher_dashboard')
-
 # @user_passes_test(is_teacher)
 def grant_temporary_permission(request, student_id):
     student = get_object_or_404(StudentProfile, id=student_id)

@@ -7,6 +7,7 @@ class StudentProfile(models.Model):
 
     # Lunch periods (4th to 7th)
     LUNCH_PERIODS = [
+        (0, 'Grab and Go'),  # Added this line
         (4, '4th Period'),
         (5, '5th Period'),
         (6, '6th Period'),

@@ -12,7 +12,7 @@
                 <input type="text" id="search-bar" placeholder="Search students..." aria-label="Search students">
             </div>
             <div class="current-period-indicator">
-                <span class="period-label">Current Lunch Period:</span>
+                <span class="period-label">Current Period:</span>
                 <span class="period-value">{{ current_period }}</span>
             </div>
         </div>
@@ -27,6 +27,15 @@
                 Currently
                 {% if students_with_lunch %}
                 <span class="badge">{{ students_with_lunch|length }}</span>
+                {% endif %}
+            </button>
+            <button class="tab-btn" data-tab="grab-and-go" aria-selected="false">
+                <svg class="tab-icon" viewBox="0 0 24 24">
+                    <path d="M18.06 22.99h1.66c.84 0 1.53-.64 1.63-1.46L23 5.05h-5V1h-1.97v4.05h-4.97l.3 2.34c1.71.47 3.31 1.32 4.27 2.26 1.44 1.42 2.43 2.89 2.43 5.29v8.05zM1 21.99V21h15.03v.99c0 .55-.45 1-1.01 1H2.01c-.56 0-1.01-.45-1.01-1zm15.03-7c0-8-15.03-8-15.03 0h15.03zM1.02 17h15v2h-15z"/>
+                </svg>
+                Grab & Go
+                {% if grab_and_go_students %}
+                <span class="badge">{{ grab_and_go_students|length }}</span>
                 {% endif %}
             </button>
             <button class="tab-btn" data-tab="temp-permission" aria-selected="false">
@@ -52,6 +61,7 @@
             {% if students_with_lunch %}
             <div class="responsive-grid">
                 {% for student in students_with_lunch %}
+                {% if student.lunch_period != 0 %} {# Exclude grab and go students from this tab #}
                 <div class="student-card">
                     <div class="student-avatar">
                         <svg viewBox="0 0 24 24">
@@ -70,10 +80,68 @@
                             {% csrf_token %}
                             <div class="form-group">
                                 <select name="lunch_period" class="form-select" aria-label="Select lunch period">
+                                    <option value="0" {% if student.lunch_period == 0 %}selected{% endif %}>Grab and Go</option>
                                     <option value="4" {% if student.lunch_period == 4 %}selected{% endif %}>4th Period</option>
                                     <option value="5" {% if student.lunch_period == 5 %}selected{% endif %}>5th Period</option>
                                     <option value="6" {% if student.lunch_period == 6 %}selected{% endif %}>6th Period</option>
                                     <option value="7" {% if student.lunch_period == 7 %}selected{% endif %}>7th Period</option>
+                                </select>
+                                <button type="submit" class="btn btn-primary" aria-label="Update lunch period">
+                                    <svg viewBox="0 0 24 24" width="18" height="18">
+                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                                    </svg>
+                                    Update
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24" class="empty-icon">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.31-8.86c-1.77-.45-2.34-.94-2.34-1.67 0-.84.79-1.43 2.1-1.43 1.38 0 1.9.66 1.94 1.64h1.71c-.05-1.34-.87-2.57-2.49-2.97V5H10.9v1.69c-1.51.32-2.72 1.3-2.72 2.81 0 1.79 1.49 2.69 3.66 3.21 1.95.46 2.34 1.15 2.34 1.87 0 .53-.39 1.39-2.1 1.39-1.6 0-2.23-.72-2.32-1.64H8.04c.1 1.7 1.36 2.66 2.86 2.97V19h2.34v-1.67c1.52-.29 2.72-1.16 2.73-2.77-.01-2.2-1.9-2.96-3.66-3.42z"/>
+                </svg>
+                <h3>No students currently at lunch</h3>
+                <p>There are no students scheduled for lunch during period {{ current_period }}.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Grab and Go Tab -->
+        <div id="grab-and-go" class="tab-content" role="tabpanel" aria-labelledby="grab-and-go-tab">
+            {% if grab_and_go_students %}
+            <div class="responsive-grid">
+                {% for student in grab_and_go_students %}
+                <div class="student-card grab-and-go-card">
+                    <div class="student-avatar">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M18.06 22.99h1.66c.84 0 1.53-.64 1.63-1.46L23 5.05h-5V1h-1.97v4.05h-4.97l.3 2.34c1.71.47 3.31 1.32 4.27 2.26 1.44 1.42 2.43 2.89 2.43 5.29v8.05zM1 21.99V21h15.03v.99c0 .55-.45 1-1.01 1H2.01c-.56 0-1.01-.45-1.01-1zm15.03-7c0-8-15.03-8-15.03 0h15.03zM1.02 17h15v2h-15z"/>
+                        </svg>
+                    </div>
+                    <div class="student-info">
+                        <h3 class="student-name">{{ student.user.get_full_name|default:student.user.username }}</h3>
+                        <p class="student-detail">
+                            <span class="detail-label">Status:</span>
+                            <span class="detail-value">Flexible Access</span>
+                        </p>
+                        <p class="student-detail">
+                            <span class="detail-label">Last Access:</span>
+                            <span class="detail-value">Today</span>
+                        </p>
+                    </div>
+                    <div class="student-actions">
+                        <form method="POST" action="{% url 'update_lunch_period' student.id %}" class="inline-form">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <select name="lunch_period" class="form-select" aria-label="Select lunch period">
+                                    <option value="0" selected>Grab and Go</option>
+                                    <option value="4">4th Period</option>
+                                    <option value="5">5th Period</option>
+                                    <option value="6">6th Period</option>
+                                    <option value="7">7th Period</option>
                                 </select>
                                 <button type="submit" class="btn btn-primary" aria-label="Update lunch period">
                                     <svg viewBox="0 0 24 24" width="18" height="18">
@@ -90,10 +158,10 @@
             {% else %}
             <div class="empty-state">
                 <svg viewBox="0 0 24 24" class="empty-icon">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.31-8.86c-1.77-.45-2.34-.94-2.34-1.67 0-.84.79-1.43 2.1-1.43 1.38 0 1.9.66 1.94 1.64h1.71c-.05-1.34-.87-2.57-2.49-2.97V5H10.9v1.69c-1.51.32-2.72 1.3-2.72 2.81 0 1.79 1.49 2.69 3.66 3.21 1.95.46 2.34 1.15 2.34 1.87 0 .53-.39 1.39-2.1 1.39-1.6 0-2.23-.72-2.32-1.64H8.04c.1 1.7 1.36 2.66 2.86 2.97V19h2.34v-1.67c1.52-.29 2.72-1.16 2.73-2.77-.01-2.2-1.9-2.96-3.66-3.42z"/>
+                    <path d="M18.06 22.99h1.66c.84 0 1.53-.64 1.63-1.46L23 5.05h-5V1h-1.97v4.05h-4.97l.3 2.34c1.71.47 3.31 1.32 4.27 2.26 1.44 1.42 2.43 2.89 2.43 5.29v8.05zM1 21.99V21h15.03v.99c0 .55-.45 1-1.01 1H2.01c-.56 0-1.01-.45-1.01-1zm15.03-7c0-8-15.03-8-15.03 0h15.03zM1.02 17h15v2h-15z"/>
                 </svg>
-                <h3>No students currently at lunch</h3>
-                <p>There are no students scheduled for lunch during period {{ current_period }}.</p>
+                <h3>No Grab and Go students</h3>
+                <p>There are currently no students with Grab and Go access.</p>
             </div>
             {% endif %}
         </div>
@@ -109,7 +177,6 @@
                             <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                         </svg>
                     </div>
-                    <!-- REPLACE THIS SECTION -->
                     <div class="student-info">
                         <h3 class="student-name">{{ student.user.get_full_name|default:student.user.username }}</h3>
                         <p class="student-detail">
@@ -121,7 +188,6 @@
                             <span class="detail-value">{{ student.temporary_permission|date:"Y-m-d" }}</span>
                         </p>
                     </div>
-                    <!-- END OF REPLACEMENT -->
                     <div class="student-actions">
                         <form method="POST" action="{% url 'revoke_temporary_permission' student.id %}" class="inline-form">
                             {% csrf_token %}
@@ -151,7 +217,7 @@
         <div id="all-students" class="tab-content" role="tabpanel" aria-labelledby="all-students-tab">
             <div class="responsive-grid">
                 {% for student in students %}
-                <div class="student-card">
+                <div class="student-card {% if student.lunch_period == 0 %}grab-and-go-card{% endif %}">
                     <div class="student-avatar">
                         <svg viewBox="0 0 24 24">
                             <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
@@ -163,12 +229,19 @@
                             <span class="detail-label">Lunch:</span>
                             <span class="detail-value">{{ student.get_lunch_period_display }}</span>
                         </p>
+                        {% if student.lunch_period == 0 %}
+                        <p class="student-detail">
+                            <span class="detail-label">Access:</span>
+                            <span class="detail-value">Flexible</span>
+                        </p>
+                        {% endif %}
                     </div>
                     <div class="student-actions">
                         <form method="POST" action="{% url 'update_lunch_period' student.id %}" class="inline-form">
                             {% csrf_token %}
                             <div class="form-group">
                                 <select name="lunch_period" class="form-select" aria-label="Select lunch period">
+                                    <option value="0" {% if student.lunch_period == 0 %}selected{% endif %}>Grab and Go</option>
                                     <option value="4" {% if student.lunch_period == 4 %}selected{% endif %}>4th Period</option>
                                     <option value="5" {% if student.lunch_period == 5 %}selected{% endif %}>5th Period</option>
                                     <option value="6" {% if student.lunch_period == 6 %}selected{% endif %}>6th Period</option>
@@ -199,6 +272,373 @@
     </div>
 </div>
 
+
+<!-- Modern Mobile Navigation Elements -->
+<button class="mobile-fab" aria-label="Open navigation">
+    <div class="fab-inner">
+        <svg class="fab-icon" width="24" height="24" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+        </svg>
+        <svg class="fab-close" width="24" height="24" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+        </svg>
+    </div>
+    <span class="fab-pulse"></span>
+</button>
+
+<div class="overlay"></div>
+<div class="bottom-sheet">
+    <div class="sheet-handle"></div>
+    <div class="bottom-sheet-header">
+        <h3 class="sheet-title">Navigate Sections</h3>
+        <button class="close-sheet" aria-label="Close">
+            <svg width="24" height="24" viewBox="0 0 24 24">
+                <path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+            </svg>
+        </button>
+    </div>
+    <div class="bottom-sheet-tabs">
+        <!-- Tabs will be inserted here by JavaScript -->
+    </div>
+    <div class="sheet-gradient"></div>
+</div>
+
+<style>
+    /* ===== Mobile Navigation Styles ===== */
+    .mobile-fab {
+        position: fixed;
+        bottom: 80px;
+        right: 20px;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4361ee, #3a0ca3);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        z-index: 1000;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+    .fab-inner {
+        position: relative;
+        width: 24px;
+        height: 24px;
+    }
+
+    .fab-icon, .fab-close {
+        position: absolute;
+        top: 0;
+        left: 0;
+        transition: all 0.3s ease;
+    }
+
+    .fab-close {
+        opacity: 0;
+        transform: rotate(-90deg);
+    }
+
+    .mobile-fab.active .fab-icon {
+        opacity: 0;
+        transform: rotate(90deg);
+    }
+
+    .mobile-fab.active .fab-close {
+        opacity: 1;
+        transform: rotate(0);
+    }
+
+    .fab-pulse {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 70%);
+        border-radius: 50%;
+        opacity: 0;
+        animation: pulse 3s infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(0.8); opacity: 0; }
+        50% { opacity: 0.4; }
+        100% { transform: scale(1.3); opacity: 0; }
+    }
+
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        backdrop-filter: blur(5px);
+        z-index: 1040;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+
+    .overlay.open {
+        opacity: 1;
+        pointer-events: all;
+    }
+
+    .bottom-sheet {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(20px);
+        border-radius: 24px 24px 0 0;
+        box-shadow: 0 -10px 30px rgba(0,0,0,0.1);
+        transform: translateY(100%);
+        transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+        z-index: 1050;
+        padding: 16px 16px 40px;
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+
+    .bottom-sheet.open {
+        transform: translateY(0);
+    }
+
+    .sheet-handle {
+        width: 40px;
+        height: 4px;
+        background: rgba(0,0,0,0.1);
+        border-radius: 2px;
+        margin: 8px auto;
+    }
+
+    .bottom-sheet-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 8px 16px;
+        margin-bottom: 8px;
+    }
+
+    .sheet-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #2b2d42;
+        margin: 0;
+        background: linear-gradient(90deg, #4361ee, #7209b7);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .close-sheet {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0,0,0,0.05);
+        border: none;
+        color: #2b2d42;
+        transition: all 0.3s ease;
+    }
+
+    .bottom-sheet-tabs {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+        padding: 8px;
+    }
+
+    .bottom-sheet-tab {
+        padding: 16px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        background: rgba(255,255,255,0.9);
+        border: 1px solid rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+
+    .bottom-sheet-tab svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .bottom-sheet-tab span {
+        font-weight: 500;
+    }
+
+    .bottom-sheet-tab.active {
+        background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), rgba(114, 9, 183, 0.1));
+        border-color: rgba(67, 97, 238, 0.2);
+    }
+
+    .bottom-sheet-tab.active span {
+        font-weight: 600;
+        background: linear-gradient(90deg, #4361ee, #7209b7);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .sheet-gradient {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 40px;
+        background: linear-gradient(to top, rgba(255,255,255,0.98), transparent);
+        pointer-events: none;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-tabs {
+            display: none;
+        }
+        
+        .dashboard-content {
+            padding-bottom: 80px;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Only create mobile navigation on small screens
+        if (window.innerWidth <= 768) {
+            // Create mobile navigation elements
+            const fab = document.querySelector('.mobile-fab');
+            const overlay = document.querySelector('.overlay');
+            const bottomSheet = document.querySelector('.bottom-sheet');
+            const tabsContainer = bottomSheet.querySelector('.bottom-sheet-tabs');
+            
+            // Populate tabs
+            document.querySelectorAll('.tab-btn').forEach(button => {
+                const tabId = button.getAttribute('data-tab');
+                const tabName = button.textContent.trim();
+                const icon = button.querySelector('.tab-icon').outerHTML;
+                
+                const tab = document.createElement('button');
+                tab.className = `bottom-sheet-tab ${button.classList.contains('active') ? 'active' : ''}`;
+                tab.setAttribute('data-tab', tabId);
+                tab.innerHTML = `${icon}<span>${tabName}</span>`;
+                
+                tab.addEventListener('click', function() {
+                    document.querySelector(`.tab-btn[data-tab="${tabId}"]`).click();
+                    closeSheet();
+                });
+                
+                tabsContainer.appendChild(tab);
+            });
+            
+            // Sheet controls
+            function openSheet() {
+                fab.classList.add('active');
+                bottomSheet.classList.add('open');
+                overlay.classList.add('open');
+                document.body.style.overflow = 'hidden';
+            }
+            
+            function closeSheet() {
+                fab.classList.remove('active');
+                bottomSheet.classList.remove('open');
+                overlay.classList.remove('open');
+                document.body.style.overflow = '';
+            }
+            
+            fab.addEventListener('click', openSheet);
+            overlay.addEventListener('click', closeSheet);
+            bottomSheet.querySelector('.close-sheet').addEventListener('click', closeSheet);
+            
+            // Swipe to close
+            let startY;
+            bottomSheet.addEventListener('touchstart', (e) => {
+                startY = e.touches[0].clientY;
+            }, { passive: true });
+            
+            bottomSheet.addEventListener('touchmove', (e) => {
+                if (e.touches[0].clientY - startY > 50) {
+                    closeSheet();
+                }
+            }, { passive: true });
+            
+            // Update active tab
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.attributeName === 'class') {
+                        const tabId = mutation.target.getAttribute('data-tab');
+                        const sheetTab = tabsContainer.querySelector(`[data-tab="${tabId}"]`);
+                        if (sheetTab) {
+                            document.querySelectorAll('.bottom-sheet-tab').forEach(t => t.classList.remove('active'));
+                            sheetTab.classList.add('active');
+                        }
+                    }
+                });
+            });
+
+            document.querySelectorAll('.tab-btn').forEach(button => {
+                observer.observe(button, { attributes: true });
+            });
+        }
+        
+        // Your existing tab switching and search functionality
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        tabButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const tabId = this.getAttribute('data-tab');
+                
+                tabButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.setAttribute('aria-selected', 'false');
+                });
+                this.classList.add('active');
+                this.setAttribute('aria-selected', 'true');
+                
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        const searchInput = document.getElementById('search-bar');
+        let searchTimeout;
+        
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(filterStudents, 300);
+        });
+
+        function filterStudents() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const activeTab = document.querySelector('.tab-content.active').id;
+            const studentCards = document.querySelectorAll(`#${activeTab} .student-card`);
+            
+            studentCards.forEach(card => {
+                const name = card.querySelector('.student-name').textContent.toLowerCase();
+                const lunchPeriod = card.querySelector('.detail-value')?.textContent.toLowerCase() || '';
+                
+                if (name.includes(searchTerm) || lunchPeriod.includes(searchTerm)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    });
+</script>
+
+
+
+
+
+
 <style>
     :root {
         /* BHSS Color Palette */
@@ -212,6 +652,7 @@
         --bhs-dark: #343a40;         /* Dark gray */
         --bhs-text: #212529;         /* Main text color */
         --bhs-border: #dee2e6;       /* Border color */
+        --bhs-grab-go: #6f42c1;      /* Purple for grab and go */
         
         /* Spacing */
         --space-xs: 0.25rem;
@@ -337,6 +778,13 @@
         display: flex;
         border-bottom: 1px solid var(--bhs-border);
         margin-bottom: var(--space-lg);
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* Firefox */
+    }
+
+    .dashboard-tabs::-webkit-scrollbar {
+        display: none; /* Chrome/Safari */
     }
 
     .tab-btn {
@@ -353,6 +801,8 @@
         color: var(--bhs-dark);
         cursor: pointer;
         transition: all 0.2s;
+        white-space: nowrap;
+        flex-shrink: 0;
     }
 
     .tab-btn:hover {
@@ -363,6 +813,11 @@
     .tab-btn.active {
         color: var(--bhs-primary);
         border-bottom-color: var(--bhs-primary);
+    }
+
+    .tab-btn[data-tab="grab-and-go"].active {
+        color: var(--bhs-grab-go);
+        border-bottom-color: var(--bhs-grab-go);
     }
 
     .tab-btn .tab-icon {
@@ -387,6 +842,14 @@
 
     .tab-btn.active .badge {
         background-color: var(--bhs-primary);
+    }
+
+    .tab-btn[data-tab="grab-and-go"] .badge {
+        background-color: var(--bhs-grab-go);
+    }
+
+    .tab-btn[data-tab="grab-and-go"].active .badge {
+        background-color: var(--bhs-grab-go);
     }
 
     /* Tab content */
@@ -414,11 +877,20 @@
         padding: var(--space-md);
         transition: transform 0.2s, box-shadow 0.2s;
         min-height: 120px;
+        position: relative;
     }
 
     .student-card:hover {
         transform: translateY(-2px);
         box-shadow: var(--shadow-md);
+    }
+
+    .grab-and-go-card {
+        border-left: 4px solid var(--bhs-grab-go);
+    }
+
+    .grab-and-go-card .student-avatar svg {
+        fill: var(--bhs-grab-go);
     }
 
     .student-avatar {
@@ -545,6 +1017,15 @@
         background-color: #e0a800;
     }
 
+    .btn-danger {
+        background-color: var(--bhs-danger);
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background-color: #c82333;
+    }
+
     .btn svg {
         width: 16px;
         height: 16px;
@@ -582,6 +1063,47 @@
         color: var(--bhs-dark);
         opacity: 0.7;
         max-width: 400px;
+    }
+
+    /* Mobile drawer for tabs on small screens */
+    .mobile-tabs-drawer {
+        display: none;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: white;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        padding: var(--space-sm);
+    }
+
+    .mobile-tabs-container {
+        display: flex;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .mobile-tabs-container::-webkit-scrollbar {
+        display: none;
+    }
+
+    .mobile-tab-btn {
+        flex: 0 0 auto;
+        padding: var(--space-sm) var(--space-md);
+        margin-right: var(--space-sm);
+        border-radius: 20px;
+        background: var(--bhs-light);
+        color: var(--bhs-dark);
+        font-size: 0.85rem;
+        white-space: nowrap;
+        border: none;
+    }
+
+    .mobile-tab-btn.active {
+        background: var(--bhs-primary);
+        color: white;
     }
 
     /* Responsive adjustments */
@@ -623,35 +1145,52 @@
         }
 
         .dashboard-tabs {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
+            display: none; /* Hide regular tabs on mobile */
         }
 
-        .tab-btn {
-            padding: var(--space-md) var(--space-md);
-            white-space: nowrap;
+        .mobile-tabs-drawer {
+            display: block; /* Show mobile tabs drawer */
         }
 
         .responsive-grid {
             grid-template-columns: 1fr;
+            margin-bottom: 60px; /* Space for mobile tabs */
         }
         
         .current-period-indicator {
             justify-content: center;
         }
-    }
 
-    @media (max-width: 480px) {
         .dashboard-title {
             font-size: 1.5rem;
         }
+    }
 
+    @media (max-width: 480px) {
         .form-group {
             flex-direction: column;
         }
 
         .form-select {
             width: 100%;
+        }
+
+        .student-actions {
+            width: 100%;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .empty-state {
+            padding: var(--space-lg) var(--space-md);
+        }
+
+        .empty-icon {
+            width: 48px;
+            height: 48px;
         }
     }
 </style>
@@ -660,23 +1199,50 @@
     document.addEventListener('DOMContentLoaded', function() {
         // Tab switching functionality
         const tabButtons = document.querySelectorAll('.tab-btn');
+        const mobileTabButtons = document.querySelectorAll('.mobile-tab-btn');
+        
+        function switchTab(tabId, button) {
+            // Update tab buttons
+            tabButtons.forEach(btn => {
+                btn.classList.remove('active');
+                btn.setAttribute('aria-selected', 'false');
+            });
+            mobileTabButtons.forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            if (button) {
+                button.classList.add('active');
+                button.setAttribute('aria-selected', 'true');
+                
+                // Find corresponding mobile button
+                const mobileButton = document.querySelector(`.mobile-tab-btn[data-tab="${tabId}"]`);
+                if (mobileButton) mobileButton.classList.add('active');
+            }
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+            
+            // Scroll to top of content
+            document.querySelector('.dashboard-content').scrollTo(0, 0);
+        }
+
         tabButtons.forEach(button => {
             button.addEventListener('click', function() {
                 const tabId = this.getAttribute('data-tab');
-                
-                // Update tab buttons
-                tabButtons.forEach(btn => {
-                    btn.classList.remove('active');
-                    btn.setAttribute('aria-selected', 'false');
-                });
-                this.classList.add('active');
-                this.setAttribute('aria-selected', 'true');
-                
-                // Update tab content
-                document.querySelectorAll('.tab-content').forEach(content => {
-                    content.classList.remove('active');
-                });
-                document.getElementById(tabId).classList.add('active');
+                switchTab(tabId, this);
+            });
+        });
+
+        mobileTabButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const tabId = this.getAttribute('data-tab');
+                // Find corresponding regular button
+                const regularButton = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
+                switchTab(tabId, regularButton);
             });
         });
 
@@ -691,7 +1257,8 @@
 
         function filterStudents() {
             const searchTerm = searchInput.value.toLowerCase();
-            const studentCards = document.querySelectorAll('.student-card');
+            const activeTab = document.querySelector('.tab-content.active').id;
+            const studentCards = document.querySelectorAll(`#${activeTab} .student-card`);
             
             studentCards.forEach(card => {
                 const name = card.querySelector('.student-name').textContent.toLowerCase();
@@ -722,6 +1289,51 @@
                 }
             });
         });
+
+        // Initialize mobile tabs if needed
+        // if (window.innerWidth <= 768) {
+        //     // Create mobile tab buttons based on existing tabs
+        //     const mobileTabsContainer = document.createElement('div');
+        //     mobileTabsContainer.className = 'mobile-tabs-container';
+            
+        //     tabButtons.forEach(button => {
+        //         const tabId = button.getAttribute('data-tab');
+        //         const mobileButton = document.createElement('button');
+        //         mobileButton.className = `mobile-tab-btn ${button.classList.contains('active') ? 'active' : ''}`;
+        //         mobileButton.setAttribute('data-tab', tabId);
+                
+        //         // Clone icon and text
+        //         const icon = button.querySelector('.tab-icon').cloneNode(true);
+        //         const text = document.createTextNode(button.textContent.trim());
+                
+        //         mobileButton.appendChild(icon);
+        //         mobileButton.appendChild(text);
+        //         mobileTabsContainer.appendChild(mobileButton);
+        //     });
+            
+        //     const mobileDrawer = document.createElement('div');
+        //     mobileDrawer.className = 'mobile-tabs-drawer';
+        //     mobileDrawer.appendChild(mobileTabsContainer);
+        //     document.body.appendChild(mobileDrawer);
+            
+        //     // Update mobile buttons when regular tabs change
+        //     const observer = new MutationObserver(function(mutations) {
+        //         mutations.forEach(function(mutation) {
+        //             if (mutation.attributeName === 'class') {
+        //                 const tabId = mutation.target.getAttribute('data-tab');
+        //                 const mobileButton = document.querySelector(`.mobile-tab-btn[data-tab="${tabId}"]`);
+        //                 if (mobileButton) {
+        //                     mobileButton.classList.toggle('active', mutation.target.classList.contains('active'));
+        //                 }
+        //             }
+        //         });
+        //     });
+
+        //     tabButtons.forEach(button => {
+        //         observer.observe(button, { attributes: true });
+        //     });
+        // }
+    
     });
 </script>
 {% endblock %}

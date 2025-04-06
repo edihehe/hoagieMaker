@@ -10,8 +10,8 @@ def is_lunch_period_valid(user, current_period):
     if student.has_temporary_permission():
         return True  # Allow ordering with temporary permission
 
-    return student.lunch_period == current_period  # Check if it's their assigned lunch period
-
+    # Allow access if it's grab and go (0) or matches current period
+    return student.lunch_period == 0 or student.lunch_period == current_period
 def get_current_period():
     """Returns the current school period (4-7) based on the time."""
     now = datetime.now().time()
