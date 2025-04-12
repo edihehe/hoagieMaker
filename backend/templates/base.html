@@ -270,6 +270,11 @@
                 ><i class="bi bi-cart"></i>My Orders</a
               >
             </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'teacher_dashboard' %}"
+                ><i class="bi bi-clipboard-check"></i>Lunch</a
+              >
+            </li>
 
             <li class="nav-item">
               <a class="nav-link" href="{% url 'view_orders' %}"
@@ -357,6 +362,61 @@
     });
   </script>
   {% endfor %} {% endif %}
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // ✅ Initialize AOS animations (optional if not used everywhere)
+      if (typeof AOS !== "undefined") AOS.init();
+
+      // ✅ Handle hoagie card clicks if present
+      document.querySelectorAll(".hoagie-card").forEach(function (card) {
+        card.addEventListener("click", function () {
+          window.location.href = card.getAttribute("data-url");
+        });
+      });
+
+      // ✅ User ID from Django (only if logged in)
+      const userId = "{{ request.user.id|default:'null' }}";
+
+      if (userId !== "null") {
+        const notificationSocket = new WebSocket(
+          `ws://${window.location.host}/ws/notifications/${userId}/`
+        );
+        notificationSocket.onmessage = function (e) {
+          const data = JSON.parse(e.data);
+          if (data.type === "order_completed") {
+            Swal.fire({
+              icon: "success",
+              title: "Your order is ready!",
+              text: `Order #${data.order_id} was completed at ${data.completed_at}.`,
+            });
+          }
+        };
+      }
+
+      // ✅ General WebSocket for kitchen/global updates
+      const generalSocket = new WebSocket(
+        "ws://" + window.location.host + "/ws/orders/"
+      );
+      generalSocket.onmessage = function (e) {
+        const data = JSON.parse(e.data);
+        if (data.type === "order_completed") {
+          const orderBox = document.getElementById("completed-orders");
+          if (orderBox) {
+            const newOrder = document.createElement("div");
+            newOrder.className = "completed-order";
+            newOrder.innerHTML = `<strong>${data.customer_name}</strong> - ${data.hoagie}`;
+            orderBox.appendChild(newOrder);
+          }
+        }
+      };
+    });
+
+    // ✅ HTMX Support (optional if HTMX is used dynamically)
+    document.addEventListener("htmx:afterSwap", function (evt) {
+      // Logic if needed for swapped-in elements
+    });
+  </script>
+
   <script src="https://unpkg.com/htmx.org@1.9.6"></script>
   <script src="https://unpkg.com/hyperscript.org@0.9.11"></script>
 </html>

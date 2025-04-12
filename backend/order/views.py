@@ -4,7 +4,10 @@ from menu.models import Menu, Topping
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from lunch.utils import *
-
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+from django.utils import timezone
+from django.utils.timezone import localtime
 def order_menu(request, menu_id):
     if not request.user.is_authenticated:
         return redirect("account_login")  # Redirect to the Allauth login page
@@ -53,7 +56,22 @@ def view_orders(request):
 
 def mark_order_completed(request, order_id):
     order = Order.objects.get(id=order_id)
-    order.mark_as_completed()
+    order.is_completed = True
+    order.completed_at = timezone.now()
+    order.save()
+
+    # Send WebSocket message to the specific user
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        f'user_{order.customer.id}_notifications',
+        {
+            'type': 'send_order_completed',
+            'order_id': order.id,
+            "completed_at": localtime(order.completed_at).strftime("%I:%M %p"),
+        }
+    )
+
+
     return redirect("view_orders")
 
 def order_detail(request, order_id):

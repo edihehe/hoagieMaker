@@ -13,10 +13,11 @@ from menu.models import Menu
 
 def landing_page(request):
     menus = Menu.objects.all()
-    
+
     if request.user.is_authenticated:
+        # Fetch only relevant orders
         orders_in_progress = Order.objects.filter(customer=request.user, is_completed=False)
-        completed_orders = Order.objects.filter(customer=request.user, is_completed=True)
+        completed_orders = Order.objects.filter(customer=request.user, is_completed=True).order_by('-completed_at')[:5]
     else:
         orders_in_progress = None
         completed_orders = None

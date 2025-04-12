@@ -22,3 +22,4 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Order by {self.customer.username} for {self.menu_item.name} at {self.created_at} - {'Completed' if self.is_completed else 'Pending'}"
+    
